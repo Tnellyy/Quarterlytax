@@ -16,18 +16,19 @@ export default function UpgradeModal({ open, onClose }) {
           background: "none", border: "none", fontSize: 18, color: "#9ca3af", cursor: "pointer",
         }}>✕</button>
 
+        {/* FIX #5: CTA COPY ALIGNED TO REAL PAID VALUE */}
         <div style={{ fontSize: 22, fontWeight: 800, color: "#111827", letterSpacing: "-.02em", marginBottom: 6 }}>
-          Never miss a quarterly payment
+          Keep your payment history
         </div>
         <div style={{ fontSize: 14, color: "#6b7280", marginBottom: 24, lineHeight: 1.6 }}>
-          The IRS charges ~8% on underpayments. Tracking eliminates that risk.
+          Your calculations aren't saved between visits. Upgrade to keep a record of every quarter.
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 }}>
           {[
-            { t: "Automatic deadline reminders", s: "7 days and 1 day before every IRS due date" },
-            { t: "All four quarters tracked", s: "See your full year — what's paid, what's due, what's next" },
-            { t: "Penalty protection", s: "Stay on track and avoid the ~8% annual underpayment charge" },
+            { t: "Saved quarterly history", s: "Your inputs and results persist across sessions" },
+            { t: "Deadline reminders", s: "Email alerts 7 days and 1 day before each IRS due date" },
+            { t: "Year-over-year tracking", s: "Compare quarters and see how your tax obligation changes" },
           ].map((b, i) => (
             <div key={i} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
               <div style={{
@@ -58,7 +59,7 @@ export default function UpgradeModal({ open, onClose }) {
           width: "100%", padding: "10px", background: "none", border: "none",
           fontSize: 13, color: "#9ca3af", cursor: "pointer", fontFamily: "inherit",
         }}>
-          Continue without tracking
+          Continue without saving
         </button>
       </div>
     </div>
