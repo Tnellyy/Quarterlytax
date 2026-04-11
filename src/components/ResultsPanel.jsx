@@ -3,6 +3,7 @@ import {
   getNextDeadline, daysUntilDeadline, getUrgencyColor,
 } from "../engine/tax";
 
+// ─── Quarter status logic ───
 function getQuarterStatuses(paidQuarters) {
   const now = new Date();
   const statuses = [];
@@ -34,7 +35,9 @@ const STATUS_STYLE = {
   upcoming:  { label: "Upcoming",  color: "#9ca3af", bg: "#f9fafb", icon: "–" },
 };
 
-function getTaxHealth(statuses) {
+function getTaxHealth(statuses, paidCount) {
+  if (paidCount === 0 && !statuses.includes("overdue") && !statuses.includes("due_today") && !statuses.includes("missed"))
+    return { label: "No payments logged", color: "#6b7280", bg: "#f9fafb", border: "#e5e7eb" };
   if (statuses.includes("overdue") || statuses.includes("due_today") || statuses.includes("missed"))
     return { label: "Action needed", color: "#b45309", bg: "#fffbeb", border: "#fde68a" };
   if (statuses.includes("due_soon"))
@@ -42,16 +45,20 @@ function getTaxHealth(statuses) {
   return { label: "On track", color: "#059669", bg: "#ecfdf5", border: "#a7f3d0" };
 }
 
-export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTrack }) {
+export default function ResultsPanel({
+  result, paidQuarters, onTogglePaid, onTrack,
+  withholding, hasW2, w2Withholding, paychecksRemaining,
+}) {
   const nd = getNextDeadline();
   const days = daysUntilDeadline(nd);
   const uc = getUrgencyColor(days);
   const $ = formatUSD;
   const P = formatPct;
   const statuses = getQuarterStatuses(paidQuarters);
-  const health = getTaxHealth(statuses);
   const paidCount = paidQuarters.length;
+  const health = getTaxHealth(statuses, paidCount);
   const px = 24;
+  const allPaid = paidCount === 4;
 
   return (
     <div>
@@ -99,7 +106,7 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
               {$(result.monthlySetAside)}<span style={{ fontSize: 13, fontWeight: 600, color: "#6b7280" }}>/mo</span>
             </div>
             <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, marginTop: 2 }}>
-              Set aside this amount to stay on track
+              Set aside monthly to stay on track
             </div>
           </div>
           <div style={{ padding: `16px ${px}px` }}>
@@ -132,7 +139,6 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0e7490" : "#6b7280", width: 24 }}>{q.quarter}</span>
                   <span style={{ fontSize: 12, color: "#9ca3af" }}>Due {q.due}</span>
-                  {/* Badge: no border, bg + text only */}
                   <span style={{
                     fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg,
                     padding: "2px 8px", borderRadius: 4,
@@ -170,7 +176,91 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
           </div>
         </div>
 
-        {/* ─── CTA: teal tint, "Next step" label, larger button ─── */}
+        {/* ═══ WITHHOLDING CHECK ═══ */}
+        {hasW2 && (
+          <div style={{ borderTop: "1px solid #f3f4f6", padding: `14px ${px}px` }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>
+              Withholding check
+            </div>
+
+            {/* State 2: withholding not entered */}
+            {w2Withholding <= 0 && (
+              <div style={{ fontSize: 13, color: "#9ca3af", lineHeight: 1.6 }}>
+                Enter your federal withholding to see your options.
+              </div>
+            )}
+
+            {/* State 3: no paychecks remaining */}
+            {w2Withholding > 0 && paychecksRemaining === 0 && (
+              <div style={{ fontSize: 13, color: "#6b7280", lineHeight: 1.6 }}>
+                No paychecks remain this year, so withholding changes won't affect this year's taxes.
+              </div>
+            )}
+
+            {/* States 4-7: withholding results */}
+            {withholding && w2Withholding > 0 && paychecksRemaining > 0 && (
+              <div>
+                {/* No shortfall */}
+                {withholding.offsetType === "no_shortfall" && (
+                  <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
+                    Your current withholding covers your projected tax liability. No quarterly payments or adjustments needed.
+                  </div>
+                )}
+
+                {/* Full offset */}
+                {withholding.offsetType === "full_offset" && (
+                  <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
+                    You can cover this through withholding. Increase your per-paycheck withholding by approximately{" "}
+                    <strong style={{ color: "#111827" }}>{$(withholding.perPaycheckIncrease)}</strong> and skip quarterly estimated payments.
+                    {paychecksRemaining <= 3 ? (
+                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                        With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, withholding changes have limited impact this year.
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                        To adjust, submit an updated W-4 to your employer — not the IRS.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Partial offset */}
+                {withholding.offsetType === "partial_offset" && (
+                  <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
+                    Increase withholding by about{" "}
+                    <strong style={{ color: "#111827" }}>{$(withholding.perPaycheckIncrease)} per paycheck</strong> to reduce quarterly payments from{" "}
+                    <strong style={{ color: "#111827" }}>{$(result.quarterlyPayment)}</strong> to{" "}
+                    <strong style={{ color: "#111827" }}>{$(withholding.reducedQuarterlyPayment)}</strong>.
+                    {paychecksRemaining <= 3 ? (
+                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                        With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, withholding changes have limited impact this year.
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                        To adjust, submit an updated W-4 to your employer — not the IRS.
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Quarterly payments needed */}
+                {withholding.offsetType === "quarterly_needed" && (
+                  <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
+                    Your remaining paychecks can't absorb the full shortfall at a reasonable level. Continue making quarterly payments of{" "}
+                    <strong style={{ color: "#111827" }}>{$(result.quarterlyPayment)}</strong>.
+                  </div>
+                )}
+
+                {/* Disclaimer — all outcomes */}
+                <div style={{ fontSize: 12, color: "#9ca3af", marginTop: 8 }}>
+                  Estimate based on inputs provided. Actual withholding depends on your W-4 and employer payroll.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── CTA ─── */}
         <div style={{ borderTop: "1px solid #e5e7eb", padding: `16px ${px}px`, background: "#f0fdfa" }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "#0e7490", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 8 }}>
             Next step
@@ -181,7 +271,7 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
           }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", textAlign: "left" }}>Keep your payment history</div>
-              <div style={{ fontSize: 12, color: "#6b7280", textAlign: "left" }}>Saved quarters, deadline reminders, quarter-by-quarter tracking</div>
+              <div style={{ fontSize: 12, color: "#6b7280", textAlign: "left" }}>Save your quarters. Get deadline reminders. Track every payment.</div>
             </div>
             <span style={{
               fontSize: 14, fontWeight: 800, color: "#fff", background: "#0e7490",
@@ -190,7 +280,7 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
           </button>
         </div>
 
-        {/* ─── Warning: quieter but still present ─── */}
+        {/* Warning */}
         <div style={{
           borderTop: "1px solid #fde68a", padding: `8px ${px}px`, background: "#fffbeb",
           display: "flex", alignItems: "center", gap: 8, borderRadius: "0 0 12px 12px",
@@ -205,7 +295,7 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
         </div>
       </div>
 
-      {/* ═══ BREAKDOWN STRIP — tighter radius, subordinate ═══ */}
+      {/* ═══ BREAKDOWN STRIP ═══ */}
       <div style={{ marginTop: 8, border: "1px solid #e5e7eb", borderRadius: 8, background: "#fff", overflow: "hidden" }}>
         <div style={{ padding: `12px ${px - 4}px`, display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
           {[
@@ -224,18 +314,23 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
         </div>
       </div>
 
-      {/* ═══ ACTION ROW — tighter gap, taller primary button ═══ */}
+      {/* ═══ ACTION ROW ═══ */}
       <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
         <button onClick={() => {
+          if (allPaid) return;
           const nextUnpaid = statuses.findIndex(s => s !== "paid");
           if (nextUnpaid >= 0) onTogglePaid(nextUnpaid);
         }} style={{
           flex: 1, textAlign: "center", padding: "15px",
-          background: "#111827", color: "#fff", borderRadius: 10,
-          fontWeight: 700, fontSize: 14, fontFamily: "inherit",
-          border: "none", cursor: "pointer",
+          background: allPaid ? "#e5e7eb" : "#111827",
+          color: allPaid ? "#9ca3af" : "#fff",
+          borderRadius: 10, fontWeight: 700, fontSize: 14, fontFamily: "inherit",
+          border: "none", cursor: allPaid ? "default" : "pointer",
         }}>
-          Log {DEADLINES[statuses.findIndex(s => s !== "paid") ?? 0]?.quarter || "Q1"} payment
+          {allPaid
+            ? "All payments logged"
+            : `Log ${DEADLINES[statuses.findIndex(s => s !== "paid")]?.quarter || "Q1"} payment`
+          }
         </button>
         <a href="https://directpay.irs.gov" target="_blank" rel="noopener noreferrer" style={{
           padding: "13px 20px", background: "#fff", border: "1.5px solid #e5e7eb", borderRadius: 10,
