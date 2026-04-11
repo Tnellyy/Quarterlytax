@@ -49,6 +49,8 @@ export default function TaxInputs({
   payFrequency, onPayFrequencyChange,
   paychecksRemaining, onPaychecksChange,
   paychecksManuallyEdited,
+  showSafeHarbor, setShowSafeHarbor,
+  lastYearTax, setLastYearTax,
 }) {
   const states = getSortedStates();
 
@@ -201,17 +203,27 @@ export default function TaxInputs({
 
       <div style={{ height: 1, background: "#f3f4f6", margin: "8px 0 16px" }} />
 
-      {/* ─── Advanced (safe harbor only) ─── */}
+      {/* ─── Safe harbor accordion ─── */}
       <button
-        onClick={() => {/* safe harbor toggle — preserved from existing */}}
+        onClick={() => setShowSafeHarbor(!showSafeHarbor)}
         style={{
           width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
           background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
         }}
       >
         <span style={{ fontSize: 12, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
-        <span style={{ color: "#d1d5db", fontSize: 16, transition: "transform .2s" }}>›</span>
+        <span style={{ color: "#d1d5db", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
       </button>
+      {showSafeHarbor && (
+        <div style={{ marginTop: 16 }}>
+          <CurrencyInput
+            label="Last year's total tax (1040 Line 24)"
+            value={lastYearTax}
+            onChange={setLastYearTax}
+            subtitle="Pay ≥100% of this to avoid underpayment penalties"
+          />
+        </div>
+      )}
     </div>
   );
 }
