@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuarterlyTax — Know what you owe. Never miss a deadline.</title>
+<meta name="description" content="Free quarterly tax calculator for freelancers and 1099 contractors. Calculate estimated federal + state tax, track all four quarters, get email reminders before every IRS deadline. $4/mo.">
+<meta name="keywords" content="freelance quarterly tax calculator, 1099 estimated tax calculator, self employment tax calculator, quarterly estimated tax payments, how much to set aside for taxes freelancer">
+<meta property="og:title" content="QuarterlyTax — Quarterly tax estimates for freelancers">
+<meta property="og:description" content="Free quarterly tax calculator. Paid tier saves your history and emails you before every IRS deadline. $4/mo.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --green-dark: #15803d;
+  --gray-50: #fafafa;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--gray-900);
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+}
+
+/* NAV */
+.nav {
+  position: sticky;
+  top: 0;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--gray-200);
+  z-index: 100;
+  padding: 0 24px;
+}
+.nav-inner {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+}
+.logo {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--gray-900);
+  text-decoration: none;
+}
+.logo span { color: var(--green); }
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-500);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.nav-links a:hover { color: var(--gray-900); }
+.btn-nav {
+  background: var(--green);
+  color: #fff !important;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.btn-nav:hover { background: var(--green-dark); }
+
+/* HERO */
+.hero {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 80px 24px 72px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-block;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 100px;
+  margin-bottom: 20px;
+  letter-spacing: 0.02em;
+}
+.hero h1 {
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+  margin-bottom: 16px;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.hero p {
+  font-size: 17px;
+  color: var(--gray-500);
+  max-width: 520px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s;
+  letter-spacing: -0.01em;
+}
+.hero-cta:hover { background: var(--green-dark); transform: translateY(-1px); }
+.hero-sub {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-top: 12px;
+}
+
+/* HERO NUMBER DEMO */
+.hero-demo {
+  margin-top: 56px;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 40px 32px;
+  max-width: 640px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.demo-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.demo-number {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--gray-900);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.demo-meta {
+  font-size: 14px;
+  color: var(--gray-400);
+  margin-top: 8px;
+}
+.demo-quarters {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+.demo-q {
+  background: #fff;
+  border: 1px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 14px 12px;
+  text-align: left;
+}
+.demo-q-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: 4px;
+}
+.demo-q-amount {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--gray-900);
+  font-variant-numeric: tabular-nums;
+}
+.demo-q-due {
+  font-size: 11px;
+  color: var(--gray-400);
+  margin-top: 2px;
+}
+
+/* PROBLEM */
+.problem {
+  background: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 72px 24px;
+}
+.problem-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+.section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+.problem h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin-bottom: 24px;
+  line-height: 1.15;
+}
+.pain-point {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.pain-point:last-child { border-bottom: none; }
+.pain-x {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.pain-text {
+  font-size: 15px;
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+/* HOW */
+.how {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 72px 24px;
+}
+.how h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin-bottom: 40px;
+  text-align: center;
+  line-height: 1.15;
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.step {
+  padding: 24px;
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  background: #fff;
+}
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.step h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.step p {
+  font-size: 14px;
+  color: var(--gray-500);
+  line-height: 1.5;
+}
+
+/* PRICING */
+.pricing {
+  background: var(--gray-50);
+  border-top: 1px solid var(--gray-200);
+  padding: 72px 24px;
+}
+.pricing-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+.pricing h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin-bottom: 8px;
+}
+.pricing > .pricing-inner > p {
+  font-size: 15px;
+  color: var(--gray-500);
+  margin-bottom: 40px;
+}
+.pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  text-align: left;
+}
+.price-card {
+  border: 1px solid var(--gray-200);
+  border-radius: 12px;
+  padding: 28px;
+  background: #fff;
+}
+.price-card.featured {
+  border: 2px solid var(--green);
+  position: relative;
+}
+.price-featured-badge {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--green);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.price-card h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.price-amount {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
+  margin: 8px 0 4px;
+}
+.price-amount span { font-size: 15px; font-weight: 500; color: var(--gray-400); }
+.price-annual {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin-bottom: 20px;
+}
+.price-features {
+  list-style: none;
+  margin-bottom: 24px;
+}
+.price-features li {
+  font-size: 14px;
+  color: var(--gray-700);
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.check {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.price-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.price-btn-outline {
+  border: 1.5px solid var(--gray-300);
+  color: var(--gray-700);
+  background: #fff;
+}
+.price-btn-outline:hover { border-color: var(--gray-900); color: var(--gray-900); }
+.price-btn-green {
+  background: var(--green);
+  color: #fff;
+  border: none;
+}
+.price-btn-green:hover { background: var(--green-dark); }
+
+/* COMPARE */
+.compare {
+  max-width: 680px;
+  margin: 40px auto 0;
+  text-align: left;
+}
+.compare-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-align: center;
+  margin-bottom: 16px;
+}
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compare-table th, .compare-table td {
+  padding: 10px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+}
+.compare-table th {
+  font-weight: 600;
+  color: var(--gray-500);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  background: var(--gray-100);
+}
+.compare-table td { color: var(--gray-700); }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table .us { font-weight: 700; color: var(--green); }
+
+/* CTA */
+.final-cta {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 72px 24px;
+  text-align: center;
+}
+.final-cta h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  margin-bottom: 12px;
+}
+.final-cta p {
+  font-size: 15px;
+  color: var(--gray-500);
+  margin-bottom: 28px;
+}
+
+/* FOOTER */
+.footer {
+  border-top: 1px solid var(--gray-200);
+  padding: 28px 24px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--gray-400);
+}
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .demo-quarters { grid-template-columns: repeat(2, 1fr); }
+  .hero { padding: 48px 20px 40px; }
+  .hero-demo { padding: 24px 16px; }
+  .demo-number { font-size: 40px; }
+  .demo-q-amount { font-size: 17px; }
+  .problem, .how, .pricing, .final-cta { padding: 48px 20px; }
+  .nav-links a:not(.btn-nav) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>Q</span>uarterlyTax</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#calculator" class="btn-nav">Try free calculator</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-badge">Free for one-shot estimates. No signup.</div>
+  <h1>Stop guessing what you owe the IRS every quarter.</h1>
+  <p>A quarterly tax calculator built for freelancers. Enter your income, see your bill, pay on time. That's it.</p>
+  <a href="#calculator" class="hero-cta">Calculate your quarterly taxes →</a>
+  <div class="hero-sub">No signup required. Takes 60 seconds.</div>
+
+  <!-- Demo visual -->
+  <div class="hero-demo">
+    <div class="demo-label">Estimated tax · 2025</div>
+    <div class="demo-number">$14,820</div>
+    <div class="demo-meta">24.7% effective rate on $60,000 net freelance income</div>
+    <div class="demo-quarters">
+      <div class="demo-q">
+        <div class="demo-q-label">Q1</div>
+        <div class="demo-q-amount">$3,705</div>
+        <div class="demo-q-due">Due Apr 15</div>
+      </div>
+      <div class="demo-q">
+        <div class="demo-q-label">Q2</div>
+        <div class="demo-q-amount">$3,705</div>
+        <div class="demo-q-due">Due Jun 16</div>
+      </div>
+      <div class="demo-q">
+        <div class="demo-q-label">Q3</div>
+        <div class="demo-q-amount">$3,705</div>
+        <div class="demo-q-due">Due Sep 15</div>
+      </div>
+      <div class="demo-q">
+        <div class="demo-q-label">Q4</div>
+        <div class="demo-q-amount">$3,705</div>
+        <div class="demo-q-due">Due Jan 15</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section class="problem">
+  <div class="problem-inner">
+    <div class="section-label">The problem</div>
+    <h2>Every freelancer has the same tax panic four times a year.</h2>
+    <div class="pain-point">
+      <div class="pain-x">✕</div>
+      <div class="pain-text">"I just guessed last quarter and overpaid by $800. Then underpaid Q3 and got a penalty." Quarterly taxes shouldn't feel like a coin flip.</div>
+    </div>
+    <div class="pain-point">
+      <div class="pain-x">✕</div>
+      <div class="pain-text">"I used a free calculator online but it didn't save anything. Next quarter I had to start from scratch." One-shot calculators don't help you track your year.</div>
+    </div>
+    <div class="pain-point">
+      <div class="pain-x">✕</div>
+      <div class="pain-text">"I forgot the June deadline completely. The IRS charged me an underpayment penalty on top of what I already owed." Nobody should pay a penalty for forgetting a date.</div>
+    </div>
+    <div class="pain-point">
+      <div class="pain-x">✕</div>
+      <div class="pain-text">"Keeper and TurboTax want $16-$129/year. I don't need expense tracking or tax filing. I just need to know what to set aside." Existing tools do too much and charge too much.</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-label" style="text-align:center;">How it works</div>
+  <h2>Three inputs. One number. Zero guesswork.</h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Enter your quarter</h3>
+      <p>State, filing status, freelance income, and business deductions. That's all we need.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>See what you owe</h3>
+      <p>Federal income tax + self-employment tax + state tax, broken down per quarter with IRS deadlines.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Get reminded</h3>
+      <p>Save your estimate and we'll email you the exact amount to pay before each IRS deadline. Direct link to IRS Direct Pay included.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="pricing-inner">
+    <div class="section-label">Pricing</div>
+    <h2>One thing done well. Priced accordingly.</h2>
+    <p>No expense tracking. No receipt scanning. No tax filing. Just quarterly estimates.</p>
+
+    <div class="pricing-cards">
+      <div class="price-card">
+        <h3>Free</h3>
+        <div class="price-amount">$0</div>
+        <div class="price-annual">Forever free. No account needed.</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span>Unlimited one-shot calculations</li>
+          <li><span class="check">✓</span>Federal + SE + state tax</li>
+          <li><span class="check">✓</span>Full tax breakdown</li>
+          <li><span class="check">✓</span>Direct link to IRS Direct Pay</li>
+        </ul>
+        <a href="#calculator" class="price-btn price-btn-outline">Use free calculator</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-featured-badge">Most popular</div>
+        <h3>Pro</h3>
+        <div class="price-amount">$4<span>/mo</span></div>
+        <div class="price-annual">or $39/year (save 19%)</div>
+        <ul class="price-features">
+          <li><span class="check">✓</span>Everything in Free</li>
+          <li><span class="check">✓</span>Saved quarterly history</li>
+          <li><span class="check">✓</span>Year-at-a-glance dashboard</li>
+          <li><span class="check">✓</span>Email reminders before every deadline</li>
+          <li><span class="check">✓</span>Quarter-over-quarter comparison</li>
+        </ul>
+        <a href="#" class="price-btn price-btn-green">Start 14-day free trial</a>
+      </div>
+    </div>
+
+    <!-- Competitor comparison -->
+    <div class="compare">
+      <div class="compare-title">How we compare</div>
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Tool</th>
+            <th>Price</th>
+            <th>Quarterly estimates</th>
+            <th>History &amp; reminders</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="us">QuarterlyTax</td>
+            <td class="us">$4/mo</td>
+            <td>✓</td>
+            <td>✓</td>
+          </tr>
+          <tr>
+            <td>Keeper Tax</td>
+            <td>$16/mo</td>
+            <td>✓ (free calc)</td>
+            <td>✕</td>
+          </tr>
+          <tr>
+            <td>TurboTax SE</td>
+            <td>$129/yr</td>
+            <td>✓</td>
+            <td>✕</td>
+          </tr>
+          <tr>
+            <td>Plutio</td>
+            <td>$19/mo</td>
+            <td>✓ (basic)</td>
+            <td>✕</td>
+          </tr>
+          <tr>
+            <td>IRS 1040-ES</td>
+            <td>Free</td>
+            <td>Paper worksheet</td>
+            <td>✕</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta" id="calculator">
+  <h2>Know what you owe before the IRS tells you.</h2>
+  <p>Try the free calculator. Takes 60 seconds. No signup, no email, no catches.</p>
+  <a href="#" class="hero-cta" onclick="alert('In production, this scrolls to the embedded React calculator or routes to /calculator.')">Open free calculator →</a>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>QuarterlyTax is not a tax advisor. Estimates use simplified 2025 rates and are not a substitute for professional tax advice. Consult a CPA for your specific situation.</p>
+  <p style="margin-top:8px;">© 2025 QuarterlyTax. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
