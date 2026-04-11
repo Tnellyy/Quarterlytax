@@ -38,7 +38,6 @@ export const BRACKETS = {
   ],
 };
 
-// ─── Standard Deductions ───
 export const STANDARD_DEDUCTIONS = {
   single: 15000,
   married_jointly: 30000,
@@ -46,7 +45,6 @@ export const STANDARD_DEDUCTIONS = {
   head_of_household: 22500,
 };
 
-// ─── State Tax Rates (simplified flat) ───
 export const STATES = {
   AL: { name: "Alabama", rate: 0.05 },
   AK: { name: "Alaska", rate: 0 },
@@ -101,7 +99,6 @@ export const STATES = {
   DC: { name: "Washington, D.C.", rate: 0.065 },
 };
 
-// ─── IRS Deadlines ───
 export const DEADLINES = [
   { quarter: "Q1", due: "Apr 15", date: new Date(2025, 3, 15) },
   { quarter: "Q2", due: "Jun 16", date: new Date(2025, 5, 16) },
@@ -116,9 +113,16 @@ export const FILING_LABELS = {
   head_of_household: "Head of household",
 };
 
+export const PAY_FREQUENCIES = {
+  weekly: { label: "Weekly", periods: 52 },
+  biweekly: { label: "Every 2 weeks", periods: 26 },
+  semimonthly: { label: "Twice a month", periods: 24 },
+  monthly: { label: "Monthly", periods: 12 },
+};
+
 const SS_WAGE_BASE = 176100;
 
-// ─── Pure Calculation Functions ───
+// ─── Core Tax Calculation ───
 
 export function calculateFederalTax(taxableIncome, status) {
   const brackets = BRACKETS[status];
@@ -168,13 +172,11 @@ export function getUrgencyColor(days) {
   return "#ef4444";
 }
 
-// ─── Main Entry Point ───
-
-export function calculateTax({ income, deductions, filingStatus, stateCode }) {
+export function calculateTax({ income, deductions, filingStatus, stateCode, w2Income = 0, w2Withholding = 0 }) {
   const netIncome = Math.max(0, income - deductions);
   const se = calculateSelfEmploymentTax(netIncome);
   const qbi = netIncome * 0.20;
-  const agi = netIncome - se.deduction;
+  const agi = netIncome + w2Income - se.deduction;
   const standardDeduction = STANDARD_DEDUCTIONS[filingStatus] || 15000;
   const taxableIncome = Math.max(0, agi - standardDeduction - qbi);
   const federalIncomeTax = calculateFederalTax(taxableIncome, filingStatus);
@@ -183,6 +185,7 @@ export function calculateTax({ income, deductions, filingStatus, stateCode }) {
   const stateTax = stateTaxableIncome * stateRate;
   const totalFederalTax = federalIncomeTax + se.tax;
   const totalAnnualTax = totalFederalTax + stateTax;
+  const afterWithholding = Math.max(0, totalAnnualTax - w2Withholding);
 
   return {
     grossIncome: income,
@@ -196,13 +199,102 @@ export function calculateTax({ income, deductions, filingStatus, stateCode }) {
     federalIncomeTax,
     stateTax,
     totalAnnualTax,
-    quarterlyPayment: Math.round(totalAnnualTax / 4),
-    monthlySetAside: Math.round(totalAnnualTax / 12),
-    effectiveRate: netIncome > 0 ? totalAnnualTax / netIncome : 0,
+    afterWithholding,
+    quarterlyPayment: Math.round(afterWithholding / 4),
+    monthlySetAside: Math.round(afterWithholding / 12),
+    effectiveRate: netIncome + w2Income > 0 ? totalAnnualTax / (netIncome + w2Income) : 0,
     marginalRate: getMarginalRate(taxableIncome, filingStatus),
     quarterlyFederal: Math.round(totalFederalTax / 4),
     quarterlyState: Math.round(stateTax / 4),
     quarterlySE: Math.round(se.tax / 4),
+  };
+}
+
+// ─── Withholding Offset ───
+
+export function getPaychecksRemaining(payFrequency) {
+  const now = new Date();
+  const endOfYear = new Date(now.getFullYear(), 11, 31);
+  const daysLeft = Math.max(0, Math.ceil((endOfYear - now) / (1000 * 60 * 60 * 24)));
+  const freq = PAY_FREQUENCIES[payFrequency];
+  if (!freq) return 0;
+  const daysBetweenChecks = 365 / freq.periods;
+  return Math.max(0, Math.floor(daysLeft / daysBetweenChecks));
+}
+
+export function calculateWithholdingOffset({
+  totalTaxLiability,
+  currentWithholding,
+  payFrequency,
+  paychecksRemaining,
+  w2AnnualIncome,
+}) {
+  const shortfall = Math.max(0, totalTaxLiability - currentWithholding);
+
+  // No shortfall — withholding already covers liability
+  if (shortfall <= 0) {
+    return {
+      shortfall: 0,
+      perPaycheckIncrease: 0,
+      offsetType: "no_shortfall",
+      reducedQuarterlyPayment: 0,
+      grossPerPaycheck: 0,
+    };
+  }
+
+  const freq = PAY_FREQUENCIES[payFrequency];
+  const annualPeriods = freq ? freq.periods : 26;
+  const grossPerPaycheck = annualPeriods > 0 ? w2AnnualIncome / annualPeriods : 0;
+
+  // No paychecks remaining — can't offset through withholding
+  // UI handles the messaging, but return valid data
+  if (paychecksRemaining <= 0) {
+    return {
+      shortfall,
+      perPaycheckIncrease: 0,
+      offsetType: "no_paychecks",
+      reducedQuarterlyPayment: Math.round(shortfall / 4),
+      grossPerPaycheck,
+    };
+  }
+
+  const fullIncrease = shortfall / paychecksRemaining;
+  const maxReasonableIncrease = grossPerPaycheck * 0.50;
+
+  // Full offset — per-paycheck increase is within 50% of gross
+  if (fullIncrease <= maxReasonableIncrease && grossPerPaycheck > 0) {
+    return {
+      shortfall,
+      perPaycheckIncrease: Math.round(fullIncrease),
+      offsetType: "full_offset",
+      reducedQuarterlyPayment: 0,
+      grossPerPaycheck,
+    };
+  }
+
+  // Check for partial offset — cap increase at 30% of gross
+  const reasonableIncrease = grossPerPaycheck * 0.30;
+  const totalAbsorbed = reasonableIncrease * paychecksRemaining;
+
+  if (totalAbsorbed > shortfall * 0.25 && grossPerPaycheck > 0) {
+    // Partial offset covers more than 25% of shortfall — worth recommending
+    const remainingShortfall = Math.max(0, shortfall - totalAbsorbed);
+    return {
+      shortfall,
+      perPaycheckIncrease: Math.round(reasonableIncrease),
+      offsetType: "partial_offset",
+      reducedQuarterlyPayment: Math.round(remainingShortfall / 4),
+      grossPerPaycheck,
+    };
+  }
+
+  // Quarterly payments needed — withholding can't meaningfully help
+  return {
+    shortfall,
+    perPaycheckIncrease: 0,
+    offsetType: "quarterly_needed",
+    reducedQuarterlyPayment: Math.round(shortfall / 4),
+    grossPerPaycheck,
   };
 }
 
