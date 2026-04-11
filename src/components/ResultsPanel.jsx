@@ -212,15 +212,9 @@ export default function ResultsPanel({
                   <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
                     You can cover this through withholding. Increase your per-paycheck withholding by approximately{" "}
                     <strong style={{ color: "#111827" }}>{$(withholding.perPaycheckIncrease)}</strong> and skip quarterly estimated payments.
-                    {paychecksRemaining <= 3 ? (
-                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
-                        With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, withholding changes have limited impact this year.
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
-                        To adjust, submit an updated W-4 to your employer — not the IRS.
-                      </div>
-                    )}
+                    <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                      To adjust, submit an updated W-4 to your employer — not the IRS.
+                    </div>
                   </div>
                 )}
 
@@ -248,6 +242,11 @@ export default function ResultsPanel({
                   <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
                     Your remaining paychecks can't absorb the full shortfall at a reasonable level. Continue making quarterly payments of{" "}
                     <strong style={{ color: "#111827" }}>{$(result.quarterlyPayment)}</strong>.
+                    {paychecksRemaining <= 3 && paychecksRemaining > 0 && (
+                      <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                        With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, withholding changes have limited impact this year.
+                      </div>
+                    )}
                   </div>
                 )}
 
