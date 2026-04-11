@@ -25,13 +25,13 @@ function getQuarterStatuses(paidQuarters) {
 }
 
 const STATUS_STYLE = {
-  paid:      { label: "Paid",      color: "#059669", bg: "#ecfdf5", border: "#a7f3d0", icon: "✓" },
-  overdue:   { label: "Overdue",   color: "#dc2626", bg: "#fef2f2", border: "#fecaca", icon: "!" },
-  due_today: { label: "Due today", color: "#dc2626", bg: "#fef2f2", border: "#fecaca", icon: "!" },
-  due_soon:  { label: "Due soon",  color: "#b45309", bg: "#fffbeb", border: "#fde68a", icon: "●" },
-  current:   { label: "Current",   color: "#0e7490", bg: "#ecfeff", border: "#a5f3fc", icon: "→" },
-  missed:    { label: "Missed",    color: "#9ca3af", bg: "#f3f4f6", border: "#e5e7eb", icon: "–" },
-  upcoming:  { label: "Upcoming",  color: "#9ca3af", bg: "#f9fafb", border: "#e5e7eb", icon: "–" },
+  paid:      { label: "Paid",      color: "#059669", bg: "#ecfdf5", icon: "✓" },
+  overdue:   { label: "Overdue",   color: "#dc2626", bg: "#fef2f2", icon: "!" },
+  due_today: { label: "Due today", color: "#dc2626", bg: "#fef2f2", icon: "!" },
+  due_soon:  { label: "Due soon",  color: "#b45309", bg: "#fffbeb", icon: "●" },
+  current:   { label: "Current",   color: "#0e7490", bg: "#ecfeff", icon: "→" },
+  missed:    { label: "Missed",    color: "#9ca3af", bg: "#f3f4f6", icon: "–" },
+  upcoming:  { label: "Upcoming",  color: "#9ca3af", bg: "#f9fafb", icon: "–" },
 };
 
 function getTaxHealth(statuses) {
@@ -51,8 +51,6 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
   const statuses = getQuarterStatuses(paidQuarters);
   const health = getTaxHealth(statuses);
   const paidCount = paidQuarters.length;
-
-  // internal padding for all card sections
   const px = 24;
 
   return (
@@ -134,9 +132,10 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0e7490" : "#6b7280", width: 24 }}>{q.quarter}</span>
                   <span style={{ fontSize: 12, color: "#9ca3af" }}>Due {q.due}</span>
+                  {/* Badge: no border, bg + text only */}
                   <span style={{
                     fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg,
-                    padding: "2px 8px", borderRadius: 4, border: `1px solid ${cfg.border}`,
+                    padding: "2px 8px", borderRadius: 4,
                   }}>
                     {cfg.icon} {cfg.label}
                   </span>
@@ -171,10 +170,10 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
           </div>
         </div>
 
-        {/* CTA */}
-        <div style={{ borderTop: "1px solid #f3f4f6", padding: `16px ${px}px`, background: "#f9fafb" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#9ca3af", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 8 }}>
-            Recommended
+        {/* ─── CTA: teal tint, "Next step" label, larger button ─── */}
+        <div style={{ borderTop: "1px solid #e5e7eb", padding: `16px ${px}px`, background: "#f0fdfa" }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "#0e7490", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 8 }}>
+            Next step
           </div>
           <button onClick={onTrack} style={{
             width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
@@ -182,32 +181,32 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
           }}>
             <div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "#111827", textAlign: "left" }}>Keep your payment history</div>
-              <div style={{ fontSize: 12, color: "#6b7280", textAlign: "left" }}>Saved quarters, deadline reminders, year-over-year tracking</div>
+              <div style={{ fontSize: 12, color: "#6b7280", textAlign: "left" }}>Saved quarters, deadline reminders, quarter-by-quarter tracking</div>
             </div>
             <span style={{
-              fontSize: 13, fontWeight: 800, color: "#fff", background: "#0e7490",
-              padding: "8px 16px", borderRadius: 8, flexShrink: 0,
+              fontSize: 14, fontWeight: 800, color: "#fff", background: "#0e7490",
+              padding: "10px 20px", borderRadius: 8, flexShrink: 0,
             }}>$4/mo →</span>
           </button>
         </div>
 
-        {/* Warning */}
+        {/* ─── Warning: quieter but still present ─── */}
         <div style={{
-          borderTop: "1px solid #fde68a", padding: `10px ${px}px`, background: "#fffbeb",
+          borderTop: "1px solid #fde68a", padding: `8px ${px}px`, background: "#fffbeb",
           display: "flex", alignItems: "center", gap: 8, borderRadius: "0 0 12px 12px",
         }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1L1 13h12L7 1z" fill="#f59e0b" />
             <text x="7" y="11" textAnchor="middle" fill="#fff" fontSize="8" fontWeight="800">!</text>
           </svg>
-          <span style={{ fontSize: 12, fontWeight: 600, color: "#92400e" }}>
+          <span style={{ fontSize: 12, fontWeight: 500, color: "#92400e" }}>
             Underpayment may result in IRS penalties and interest charges
           </span>
         </div>
       </div>
 
-      {/* ═══ BREAKDOWN STRIP — 8px gap ═══ */}
-      <div style={{ marginTop: 8, border: "1px solid #e5e7eb", borderRadius: 12, background: "#fff", overflow: "hidden" }}>
+      {/* ═══ BREAKDOWN STRIP — tighter radius, subordinate ═══ */}
+      <div style={{ marginTop: 8, border: "1px solid #e5e7eb", borderRadius: 8, background: "#fff", overflow: "hidden" }}>
         <div style={{ padding: `12px ${px - 4}px`, display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
           {[
             { label: "Federal", value: $(result.quarterlyFederal) },
@@ -225,13 +224,13 @@ export default function ResultsPanel({ result, paidQuarters, onTogglePaid, onTra
         </div>
       </div>
 
-      {/* ═══ ACTION ROW — 8px gap ═══ */}
-      <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
+      {/* ═══ ACTION ROW — tighter gap, taller primary button ═══ */}
+      <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
         <button onClick={() => {
           const nextUnpaid = statuses.findIndex(s => s !== "paid");
           if (nextUnpaid >= 0) onTogglePaid(nextUnpaid);
         }} style={{
-          flex: 1, textAlign: "center", padding: "13px",
+          flex: 1, textAlign: "center", padding: "15px",
           background: "#111827", color: "#fff", borderRadius: 10,
           fontWeight: 700, fontSize: 14, fontFamily: "inherit",
           border: "none", cursor: "pointer",
