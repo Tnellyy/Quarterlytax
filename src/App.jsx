@@ -1,10 +1,14 @@
 import { useState, useMemo } from "react";
-import { calculateTax, formatUSD, getNextDeadline, daysUntilDeadline } from "./engine/tax";
+import {
+  calculateTax, calculateWithholdingOffset, getPaychecksRemaining,
+  formatUSD, getNextDeadline, daysUntilDeadline,
+} from "./engine/tax";
 import TaxInputs from "./components/TaxInputs";
 import ResultsPanel from "./components/ResultsPanel";
 import UpgradeModal from "./components/UpgradeModal";
 
 export default function App() {
+  // Core inputs
   const [income, setIncome] = useState(85000);
   const [state, setState] = useState("CA");
   const [status, setStatus] = useState("single");
@@ -13,16 +17,57 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [paidQuarters, setPaidQuarters] = useState([]);
 
+  // W-2 inputs
+  const [hasW2, setHasW2] = useState(false);
+  const [w2Income, setW2Income] = useState(0);
+  const [w2Withholding, setW2Withholding] = useState(0);
+  const [payFrequency, setPayFrequency] = useState("biweekly");
+  const [paychecksRemaining, setPaychecksRemaining] = useState(() => getPaychecksRemaining("biweekly"));
+  const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
+
+  // Tax calculation — includes W-2 when toggled on
   const result = useMemo(
-    () => calculateTax({ income, deductions, filingStatus: status, stateCode: state }),
-    [income, deductions, status, state]
+    () => calculateTax({
+      income,
+      deductions,
+      filingStatus: status,
+      stateCode: state,
+      w2Income: hasW2 ? w2Income : 0,
+      w2Withholding: hasW2 ? w2Withholding : 0,
+    }),
+    [income, deductions, status, state, hasW2, w2Income, w2Withholding]
   );
 
+  // Withholding offset — only computed when W-2 is active and withholding entered
+  const withholding = useMemo(() => {
+    if (!hasW2 || w2Withholding <= 0) return null;
+    return calculateWithholdingOffset({
+      totalTaxLiability: result.totalAnnualTax,
+      currentWithholding: w2Withholding,
+      payFrequency,
+      paychecksRemaining,
+      w2AnnualIncome: w2Income,
+    });
+  }, [hasW2, result.totalAnnualTax, w2Withholding, payFrequency, paychecksRemaining, w2Income]);
+
   const nd = getNextDeadline();
-  const hasIncome = income > 0;
+  const hasIncome = income > 0 || (hasW2 && w2Income > 0);
 
   const togglePaid = (i) => {
     setPaidQuarters((p) => p.includes(i) ? p.filter((x) => x !== i) : [...p, i]);
+  };
+
+  // Pay frequency change handler
+  const handlePayFrequencyChange = (freq) => {
+    setPayFrequency(freq);
+    // Always recalculate when frequency changes, reset manual flag
+    setPaychecksRemaining(getPaychecksRemaining(freq));
+    setPaychecksManuallyEdited(false);
+  };
+
+  const handlePaychecksChange = (val) => {
+    setPaychecksRemaining(val);
+    setPaychecksManuallyEdited(true);
   };
 
   return (
@@ -45,25 +90,20 @@ export default function App() {
       <nav style={{ borderBottom: "1px solid #f3f4f6", padding: "0 30px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.02em" }}>QuarterlyTax</span>
-          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-            <span style={{ fontSize: 13, color: "#9ca3af", cursor: "pointer" }}>How it works</span>
-            <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0e7490", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign in</button>
-          </div>
+          <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0e7490", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign in</button>
         </div>
       </nav>
 
       {/* DISCLAIMER */}
-      <div style={{ borderBottom: "1px solid #fef3c7", background: "#fffbeb", padding: "6px 30px", fontSize: 11, color: "#92400e", textAlign: "center", fontWeight: 500 }}>
+      <div style={{ borderBottom: "1px solid #fef9c3", background: "#fefce8", padding: "6px 30px", fontSize: 11, color: "#92400e", textAlign: "center", fontWeight: 500 }}>
         Estimates based on simplified 2025 federal rates — not tax advice. Consult a professional before making payments.
       </div>
 
-      {/* MAIN — wider shell, tighter top padding */}
+      {/* MAIN */}
       <div style={{ flex: 1, maxWidth: 1360, margin: "0 auto", width: "100%", padding: "22px 30px" }}>
-
-        {/* TWO-COLUMN: 340px left control panel + dominant right surface */}
         <div className="qt-hero" style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
 
-          {/* LEFT: compact control panel, content-height, no header */}
+          {/* LEFT */}
           <div className="qt-left" style={{ width: 340, flexShrink: 0 }}>
             <TaxInputs
               income={income} setIncome={setIncome}
@@ -71,13 +111,18 @@ export default function App() {
               status={status} setStatus={setStatus}
               deductions={deductions} setDeductions={setDeductions}
               showDeductions={showDeductions} setShowDeductions={setShowDeductions}
+              hasW2={hasW2} setHasW2={setHasW2}
+              w2Income={w2Income} setW2Income={setW2Income}
+              w2Withholding={w2Withholding} setW2Withholding={setW2Withholding}
+              payFrequency={payFrequency} onPayFrequencyChange={handlePayFrequencyChange}
+              paychecksRemaining={paychecksRemaining} onPaychecksChange={handlePaychecksChange}
+              paychecksManuallyEdited={paychecksManuallyEdited}
             />
           </div>
 
-          {/* RIGHT: product surface with header zone */}
+          {/* RIGHT */}
           <div className="qt-right" style={{ flex: 1, minWidth: 0 }}>
-
-            {/* RIGHT-COLUMN HEADER ZONE — headline lives here, not above both columns */}
+            {/* Right-column header zone */}
             <div style={{ marginBottom: 14 }}>
               <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.03em", color: "#111827", lineHeight: 1.2, marginBottom: 4 }}>
                 {hasIncome
@@ -86,17 +131,20 @@ export default function App() {
                 }
               </h1>
               {hasIncome
-                ? <p style={{ fontSize: 13, color: "#b45309", fontWeight: 600 }}>Due {nd.due} — the IRS assesses penalties on late or insufficient quarterly payments.</p>
+                ? <p style={{ fontSize: 13, color: "#b45309", fontWeight: 600 }}>Due {nd.due} — late or insufficient payments may incur IRS penalties.</p>
                 : <p style={{ fontSize: 13, color: "#6b7280" }}>Federal + state + self-employment tax, calculated in real time.</p>
               }
             </div>
 
-            {/* RESULTS PANEL */}
             <ResultsPanel
               result={result}
               paidQuarters={paidQuarters}
               onTogglePaid={togglePaid}
               onTrack={() => setShowModal(true)}
+              withholding={withholding}
+              hasW2={hasW2}
+              w2Withholding={w2Withholding}
+              paychecksRemaining={paychecksRemaining}
             />
           </div>
         </div>
