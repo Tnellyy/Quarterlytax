@@ -14,6 +14,8 @@ export default function App() {
   const [status, setStatus] = useState("single");
   const [deductions, setDeductions] = useState(0);
   const [showDeductions, setShowDeductions] = useState(false);
+  const [showSafeHarbor, setShowSafeHarbor] = useState(false);
+  const [lastYearTax, setLastYearTax] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [paidQuarters, setPaidQuarters] = useState([]);
 
@@ -117,6 +119,8 @@ export default function App() {
               payFrequency={payFrequency} onPayFrequencyChange={handlePayFrequencyChange}
               paychecksRemaining={paychecksRemaining} onPaychecksChange={handlePaychecksChange}
               paychecksManuallyEdited={paychecksManuallyEdited}
+              showSafeHarbor={showSafeHarbor} setShowSafeHarbor={setShowSafeHarbor}
+              lastYearTax={lastYearTax} setLastYearTax={setLastYearTax}
             />
           </div>
 
