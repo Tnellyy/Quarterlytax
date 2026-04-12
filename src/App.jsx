@@ -86,7 +86,13 @@ export default function App() {
 
       <nav style={{ borderBottom: "1px solid #2a2e3a", padding: "0 30px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.02em", color: "#e8eaed" }}>QuarterlyTax</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="8" stroke="#e8eaed" strokeWidth="3.5" fill="none" strokeDasharray="37.7 12.57" strokeDashoffset="-18.84"/>
+              <g transform="translate(1.2,1.2)"><circle cx="12" cy="12" r="8" stroke="#e8eaed" strokeWidth="3.5" fill="none" strokeDasharray="10.5 39.77" strokeDashoffset="-7.28"/></g>
+            </svg>
+            <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.02em", color: "#e8eaed" }}>QuarterlyTax</span>
+          </div>
           <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0ea5c9", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign in</button>
         </div>
       </nav>
