@@ -10,21 +10,21 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
 
   return (
     <div style={{ marginBottom: 16 }}>
-      <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 5 }}>
+      <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "#8b8f9a", marginBottom: 5 }}>
         {label}
       </label>
       <div
         style={{
           display: "flex",
           alignItems: "center",
-          border: focused ? "1.5px solid #0e7490" : "1.5px solid #e5e7eb",
+          border: focused ? "1.5px solid #0e7490" : "1.5px solid #2a2e3a",
           borderRadius: 10,
-          background: focused ? "#fff" : "#f9fafb",
+          background: focused ? "#242836" : "#1e2230",
           padding: "0 14px",
           transition: "all .15s",
         }}
       >
-        <span style={{ color: "#9ca3af", fontSize: 15, fontWeight: 500 }}>$</span>
+        <span style={{ color: "#6b7280", fontSize: 15, fontWeight: 500 }}>$</span>
         <input
           type="text"
           inputMode="numeric"
@@ -46,7 +46,7 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
             outline: "none",
             fontSize: 15,
             fontWeight: 600,
-            color: "#111827",
+            color: "#e8eaed",
             background: "transparent",
             fontFamily: "inherit",
             fontVariantNumeric: "tabular-nums",
@@ -54,7 +54,7 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
         />
       </div>
       {subtitle && (
-        <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4, lineHeight: 1.4 }}>{subtitle}</div>
+        <div style={{ fontSize: 11, color: "#6b7280", marginTop: 4, lineHeight: 1.4 }}>{subtitle}</div>
       )}
     </div>
   );
