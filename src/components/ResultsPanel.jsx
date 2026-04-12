@@ -28,19 +28,19 @@ const STATUS_STYLE = {
   paid:      { label: "Paid",      color: "#34d399", bg: "#0a2e23", icon: "✓" },
   overdue:   { label: "Overdue",   color: "#f87171", bg: "#2d0a0a", icon: "!" },
   due_today: { label: "Due today", color: "#f87171", bg: "#2d0a0a", icon: "!" },
-  due_soon:  { label: "Due soon",  color: "#e0b84d", bg: "#302510", icon: "●" },
+  due_soon:  { label: "Due soon",  color: "#e0b84d", bg: "#2e2612", icon: "●" },
   current:   { label: "Current",   color: "#0ea5c9", bg: "#122b35", icon: "→" },
-  missed:    { label: "Missed",    color: "#7a8394", bg: "#202535", icon: "–" },
-  upcoming:  { label: "Upcoming",  color: "#7a8394", bg: "#202535", icon: "–" },
+  missed:    { label: "Missed",    color: "#828a96", bg: "#202535", icon: "–" },
+  upcoming:  { label: "Upcoming",  color: "#828a96", bg: "#202535", icon: "–" },
 };
 
 function getTaxHealth(statuses, paidCount) {
   if (paidCount === 0 && !statuses.includes("overdue") && !statuses.includes("due_today") && !statuses.includes("missed"))
-    return { label: "No payments logged", color: "#7a8394", bg: "#202535", border: "#202535" };
+    return { label: "No payments logged", color: "#828a96", bg: "#202535", border: "#202535" };
   if (statuses.includes("overdue") || statuses.includes("due_today") || statuses.includes("missed"))
-    return { label: "Action needed", color: "#e0b84d", bg: "#302510", border: "#302510" };
+    return { label: "Action needed", color: "#e0b84d", bg: "#2e2612", border: "#2e2612" };
   if (statuses.includes("due_soon"))
-    return { label: "Payment approaching", color: "#e0b84d", bg: "#302510", border: "#302510" };
+    return { label: "Payment approaching", color: "#e0b84d", bg: "#2e2612", border: "#2e2612" };
   return { label: "On track", color: "#34d399", bg: "#0a2e23", border: "#0a2e23" };
 }
 
@@ -70,12 +70,12 @@ export default function ResultsPanel({
         }}>
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: health.color, flexShrink: 0 }} />
           <span style={{ fontSize: 13, fontWeight: 700, color: health.color }}>{health.label}</span>
-          <span style={{ fontSize: 12, color: "#7a8394", marginLeft: "auto" }}>{paidCount} of 4 payments logged</span>
+          <span style={{ fontSize: 12, color: "#828a96", marginLeft: "auto" }}>{paidCount} of 4 payments logged</span>
         </div>
 
         {/* Hero number */}
         <div style={{ padding: `24px ${px}px 18px` }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: "#828a96", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6 }}>
             Quarterly payment
           </div>
           <div style={{ fontSize: 48, fontWeight: 800, letterSpacing: "-.04em", lineHeight: 1, color: "#e8eaed", fontVariantNumeric: "tabular-nums" }}>
@@ -97,7 +97,7 @@ export default function ResultsPanel({
         {/* Monthly target + effective rate */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #222530" }}>
           <div style={{ padding: `16px ${px}px`, borderRight: "1px solid #222530" }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#828a96", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>
               Your monthly target
             </div>
             <div style={{ fontSize: 20, fontWeight: 800, color: "#e8eaed", fontVariantNumeric: "tabular-nums" }}>
@@ -108,7 +108,7 @@ export default function ResultsPanel({
             </div>
           </div>
           <div style={{ padding: `16px ${px}px` }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#828a96", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 4 }}>
               Effective rate
             </div>
             <div style={{ fontSize: 20, fontWeight: 800, color: "#e8eaed" }}>{P(result.effectiveRate)}</div>
@@ -122,7 +122,7 @@ export default function ResultsPanel({
 
         {/* Quarterly obligations */}
         <div style={{ borderTop: "1px solid #222530", padding: `14px ${px}px` }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#828a96", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>
             Quarterly obligations
           </div>
           {DEADLINES.map((q, i) => {
@@ -135,8 +135,8 @@ export default function ResultsPanel({
                 padding: "9px 0", borderBottom: i < 3 ? "1px solid #222530" : "none",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0ea5c9" : "#7a8394", width: 24 }}>{q.quarter}</span>
-                  <span style={{ fontSize: 12, color: "#7a8394" }}>Due {q.due}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0ea5c9" : "#828a96", width: 24 }}>{q.quarter}</span>
+                  <span style={{ fontSize: 12, color: "#828a96" }}>Due {q.due}</span>
                   <span style={{
                     fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg,
                     padding: "2px 8px", borderRadius: 4,
@@ -147,7 +147,7 @@ export default function ResultsPanel({
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{
                     fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums",
-                    color: st === "paid" || st === "missed" ? "#7a8394" : isActive ? "#0e7490" : "#e8eaed",
+                    color: st === "paid" || st === "missed" ? "#828a96" : isActive ? "#0e7490" : "#e8eaed",
                     textDecoration: st === "paid" ? "line-through" : "none",
                   }}>
                     {$(result.quarterlyPayment)}
@@ -157,7 +157,7 @@ export default function ResultsPanel({
                     fontFamily: "inherit", transition: "all .12s",
                     background: st === "paid" ? "#0a2e23" : "#202535",
                     border: st === "paid" ? "1px solid #0a2e23" : "1px solid #2a2e3a",
-                    color: st === "paid" ? "#34d399" : "#8b8f9a",
+                    color: st === "paid" ? "#34d399" : "#959aa5",
                   }}>
                     {st === "paid" ? "Paid ✓" : "Log payment"}
                   </button>
@@ -169,7 +169,7 @@ export default function ResultsPanel({
             display: "flex", justifyContent: "space-between", alignItems: "baseline",
             marginTop: 8, paddingTop: 10, borderTop: "1px solid #2a2e3a",
           }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#7a8394" }}>Total {new Date().getFullYear()}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#828a96" }}>Total {new Date().getFullYear()}</span>
             <span style={{ fontSize: 18, fontWeight: 800, fontVariantNumeric: "tabular-nums", color: "#e8eaed" }}>{$(result.totalAnnualTax)}</span>
           </div>
         </div>
@@ -177,12 +177,12 @@ export default function ResultsPanel({
         {/* Withholding check */}
         {hasW2 && (
           <div style={{ borderTop: "1px solid #222530", padding: `14px ${px}px` }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "#828a96", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 10 }}>
               Withholding check
             </div>
 
             {w2Withholding <= 0 && (
-              <div style={{ fontSize: 13, color: "#7a8394", lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: "#828a96", lineHeight: 1.6 }}>
                 Enter your federal withholding to see your options.
               </div>
             )}
@@ -241,7 +241,7 @@ export default function ResultsPanel({
                   </div>
                 )}
 
-                <div style={{ fontSize: 12, color: "#7a8394", marginTop: 8 }}>
+                <div style={{ fontSize: 12, color: "#828a96", marginTop: 8 }}>
                   Estimate based on inputs provided. Actual withholding depends on your W-4 and employer payroll.
                 </div>
               </div>
@@ -271,12 +271,12 @@ export default function ResultsPanel({
 
         {/* Warning */}
         <div style={{
-          borderTop: "1px solid #2d2810", padding: `8px ${px}px`, background: "#26200c",
+          borderTop: "1px solid #302a12", padding: `8px ${px}px`, background: "#28220f",
           display: "flex", alignItems: "center", gap: 8, borderRadius: "0 0 12px 12px",
         }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1L1 13h12L7 1z" fill="#e0b84d" />
-            <text x="7" y="11" textAnchor="middle" fill="#26200c" fontSize="8" fontWeight="800">!</text>
+            <text x="7" y="11" textAnchor="middle" fill="#28220f" fontSize="8" fontWeight="800">!</text>
           </svg>
           <span style={{ fontSize: 12, fontWeight: 500, color: "#e0b84d" }}>
             Underpayment may result in IRS penalties and interest charges
@@ -296,7 +296,7 @@ export default function ResultsPanel({
               textAlign: "center", padding: "4px 0",
               borderRight: i < 2 ? "1px solid #222530" : "none",
             }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".05em" }}>{item.label}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#828a96", textTransform: "uppercase", letterSpacing: ".05em" }}>{item.label}</div>
               <div style={{ fontSize: 15, fontWeight: 800, color: "#e8eaed", marginTop: 2, fontVariantNumeric: "tabular-nums" }}>{item.value}</div>
             </div>
           ))}
@@ -312,7 +312,7 @@ export default function ResultsPanel({
         }} style={{
           flex: 1, textAlign: "center", padding: "15px",
           background: allPaid ? "#2a2e3a" : "#e8eaed",
-          color: allPaid ? "#7a8394" : "#0f1117",
+          color: allPaid ? "#828a96" : "#0f1117",
           borderRadius: 10, fontWeight: 700, fontSize: 14, fontFamily: "inherit",
           border: "none", cursor: allPaid ? "default" : "pointer",
         }}>
@@ -331,7 +331,7 @@ export default function ResultsPanel({
       </div>
 
       {/* Disclaimer */}
-      <div style={{ marginTop: 14, fontSize: 11, color: "#7a8394", lineHeight: 1.6 }}>
+      <div style={{ marginTop: 14, fontSize: 11, color: "#828a96", lineHeight: 1.6 }}>
         <strong style={{ color: "#8b8f9a" }}>Not tax advice.</strong> Simplified 2025 federal brackets and flat state rates. Does not account for AMT, Medicare surtax, state-specific deductions, credits, or local taxes.
       </div>
     </div>
