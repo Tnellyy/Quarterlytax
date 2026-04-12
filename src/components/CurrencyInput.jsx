@@ -24,7 +24,7 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
           transition: "all .15s",
         }}
       >
-        <span style={{ color: "#7a8394", fontSize: 15, fontWeight: 500 }}>$</span>
+        <span style={{ color: "#828a96", fontSize: 15, fontWeight: 500 }}>$</span>
         <input
           type="text"
           inputMode="numeric"
@@ -54,7 +54,7 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
         />
       </div>
       {subtitle && (
-        <div style={{ fontSize: 11, color: "#7a8394", marginTop: 4, lineHeight: 1.4 }}>{subtitle}</div>
+        <div style={{ fontSize: 11, color: "#828a96", marginTop: 4, lineHeight: 1.4 }}>{subtitle}</div>
       )}
     </div>
   );
