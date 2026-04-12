@@ -8,7 +8,7 @@ const selectStyle = {
   fontSize: 14,
   fontWeight: 600,
   color: "#e8eaed",
-  background: "#1c2030",
+  background: "#202535",
   border: "1.5px solid #2a2e3a",
   borderRadius: 10,
   outline: "none",
@@ -23,7 +23,7 @@ const selectStyle = {
 const sectionLabel = {
   fontSize: 12,
   fontWeight: 700,
-  color: "#737a87",
+  color: "#7a8394",
   textTransform: "uppercase",
   letterSpacing: ".08em",
   marginBottom: 16,
@@ -54,7 +54,6 @@ export default function TaxInputs({
 }) {
   const states = getSortedStates();
 
-  // Local state for paychecks input
   const [pcFocused, setPcFocused] = useState(false);
   const [pcRaw, setPcRaw] = useState(String(paychecksRemaining));
   useEffect(() => {
@@ -64,7 +63,6 @@ export default function TaxInputs({
   return (
     <div style={{ border: "1px solid #2a2e3a", borderRadius: 12, padding: 24, background: "#181b23" }}>
 
-      {/* ─── Your details ─── */}
       <div style={sectionLabel}>Your details</div>
 
       <div style={{ marginBottom: 16 }}>
@@ -87,7 +85,6 @@ export default function TaxInputs({
 
       <div style={{ height: 1, background: "#222530", margin: "8px 0 24px" }} />
 
-      {/* ─── Quarterly income ─── */}
       <div style={sectionLabel}>Income</div>
 
       <CurrencyInput
@@ -97,7 +94,6 @@ export default function TaxInputs({
         subtitle="Gross 1099 income before expenses"
       />
 
-      {/* Deductions accordion */}
       <button
         onClick={() => setShowDeductions(!showDeductions)}
         style={{
@@ -107,7 +103,7 @@ export default function TaxInputs({
         }}
       >
         <span style={{ fontSize: 13, fontWeight: 600, color: "#8b8f9a" }}>Business deductions</span>
-        <span style={{ fontSize: 12, color: "#737a87", transform: showDeductions ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+        <span style={{ fontSize: 12, color: "#7a8394", transform: showDeductions ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
       </button>
       {showDeductions && (
         <CurrencyInput
@@ -120,10 +116,9 @@ export default function TaxInputs({
 
       <div style={{ height: 1, background: "#222530", margin: "16px 0 20px" }} />
 
-      {/* ─── W-2 toggle ─── */}
       <div style={{ marginBottom: 16 }}>
         <label style={inputLabel}>Do you also have W-2 income?</label>
-        <div style={{ display: "flex", background: "#1c2030", borderRadius: 10, padding: 3 }}>
+        <div style={{ display: "flex", background: "#202535", borderRadius: 10, padding: 3 }}>
           {[
             { key: false, label: "No" },
             { key: true, label: "Yes" },
@@ -133,9 +128,9 @@ export default function TaxInputs({
               onClick={() => setHasW2(opt.key)}
               style={{
                 flex: 1, padding: "9px 0", border: "none", borderRadius: 8,
-                background: hasW2 === opt.key ? "#2a3040" : "transparent",
+                background: hasW2 === opt.key ? "#31384a" : "transparent",
                 boxShadow: hasW2 === opt.key ? "0 1px 4px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.04)" : "none",
-                color: hasW2 === opt.key ? "#e8eaed" : "#737a87",
+                color: hasW2 === opt.key ? "#e8eaed" : "#7a8394",
                 fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
                 transition: "all .12s",
               }}
@@ -146,7 +141,6 @@ export default function TaxInputs({
         </div>
       </div>
 
-      {/* ─── W-2 inputs (conditional) ─── */}
       {hasW2 && (
         <div style={{ marginBottom: 8 }}>
           <CurrencyInput
@@ -188,14 +182,14 @@ export default function TaxInputs({
               onChange={(e) => setPcRaw(e.target.value.replace(/[^0-9]/g, ""))}
               style={{
                 width: "100%", padding: "12px 14px", fontSize: 14, fontWeight: 600,
-                color: "#e8eaed", background: pcFocused ? "#262b3a" : "#1c2030",
+                color: "#e8eaed", background: pcFocused ? "#2b3142" : "#202535",
                 border: pcFocused ? "1.5px solid #0e7490" : "1.5px solid #2a2e3a",
                 borderRadius: 10, outline: "none", fontFamily: "inherit",
                 fontVariantNumeric: "tabular-nums", transition: "all .15s",
               }}
             />
             {!paychecksManuallyEdited && (
-              <div style={{ fontSize: 11, color: "#737a87", marginTop: 4 }}>Estimated from pay frequency</div>
+              <div style={{ fontSize: 11, color: "#7a8394", marginTop: 4 }}>Estimated from pay frequency</div>
             )}
           </div>
         </div>
@@ -203,7 +197,6 @@ export default function TaxInputs({
 
       <div style={{ height: 1, background: "#222530", margin: "8px 0 16px" }} />
 
-      {/* ─── Safe harbor accordion ─── */}
       <button
         onClick={() => setShowSafeHarbor(!showSafeHarbor)}
         style={{
@@ -211,8 +204,8 @@ export default function TaxInputs({
           background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
         }}
       >
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#737a87", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
-        <span style={{ color: "#737a87", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
+        <span style={{ color: "#7a8394", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
       </button>
       {showSafeHarbor && (
         <div style={{ marginTop: 16 }}>
