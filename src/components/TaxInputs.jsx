@@ -23,7 +23,7 @@ const selectStyle = {
 const sectionLabel = {
   fontSize: 12,
   fontWeight: 700,
-  color: "#7a8394",
+  color: "#828a96",
   textTransform: "uppercase",
   letterSpacing: ".08em",
   marginBottom: 16,
@@ -103,7 +103,7 @@ export default function TaxInputs({
         }}
       >
         <span style={{ fontSize: 13, fontWeight: 600, color: "#8b8f9a" }}>Business deductions</span>
-        <span style={{ fontSize: 12, color: "#7a8394", transform: showDeductions ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+        <span style={{ fontSize: 12, color: "#828a96", transform: showDeductions ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
       </button>
       {showDeductions && (
         <CurrencyInput
@@ -130,7 +130,7 @@ export default function TaxInputs({
                 flex: 1, padding: "9px 0", border: "none", borderRadius: 8,
                 background: hasW2 === opt.key ? "#31384a" : "transparent",
                 boxShadow: hasW2 === opt.key ? "0 1px 4px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.04)" : "none",
-                color: hasW2 === opt.key ? "#e8eaed" : "#7a8394",
+                color: hasW2 === opt.key ? "#e8eaed" : "#828a96",
                 fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
                 transition: "all .12s",
               }}
@@ -189,7 +189,7 @@ export default function TaxInputs({
               }}
             />
             {!paychecksManuallyEdited && (
-              <div style={{ fontSize: 11, color: "#7a8394", marginTop: 4 }}>Estimated from pay frequency</div>
+              <div style={{ fontSize: 11, color: "#828a96", marginTop: 4 }}>Estimated from pay frequency</div>
             )}
           </div>
         </div>
@@ -204,8 +204,8 @@ export default function TaxInputs({
           background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
         }}
       >
-        <span style={{ fontSize: 12, fontWeight: 700, color: "#7a8394", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
-        <span style={{ color: "#7a8394", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#828a96", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
+        <span style={{ color: "#828a96", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
       </button>
       {showSafeHarbor && (
         <div style={{ marginTop: 16 }}>
