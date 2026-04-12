@@ -150,7 +150,7 @@ export default function App() {
         </div>
       </div>
 
-      <div style={{ borderTop: "1px solid #2a2e3a", padding: "14px 30px", textAlign: "center", fontSize: 11, color: "#7a8394" }}>
+      <div style={{ borderTop: "1px solid #2a2e3a", padding: "14px 30px", textAlign: "center", fontSize: 11, color: "#828a96" }}>
         Not tax advice. Simplified 2025 rates. © {new Date().getFullYear()} QuarterlyTax
       </div>
 
