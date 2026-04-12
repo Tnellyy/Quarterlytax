@@ -8,7 +8,6 @@ import ResultsPanel from "./components/ResultsPanel";
 import UpgradeModal from "./components/UpgradeModal";
 
 export default function App() {
-  // Core inputs
   const [income, setIncome] = useState(85000);
   const [state, setState] = useState("CA");
   const [status, setStatus] = useState("single");
@@ -19,7 +18,6 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [paidQuarters, setPaidQuarters] = useState([]);
 
-  // W-2 inputs
   const [hasW2, setHasW2] = useState(false);
   const [w2Income, setW2Income] = useState(0);
   const [w2Withholding, setW2Withholding] = useState(0);
@@ -27,7 +25,6 @@ export default function App() {
   const [paychecksRemaining, setPaychecksRemaining] = useState(() => getPaychecksRemaining("biweekly"));
   const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
 
-  // Tax calculation
   const result = useMemo(
     () => calculateTax({
       income,
@@ -40,7 +37,6 @@ export default function App() {
     [income, deductions, status, state, hasW2, w2Income, w2Withholding]
   );
 
-  // Withholding offset
   const withholding = useMemo(() => {
     if (!hasW2 || w2Withholding <= 0) return null;
     return calculateWithholdingOffset({
@@ -88,7 +84,6 @@ export default function App() {
         }
       `}</style>
 
-      {/* NAV */}
       <nav style={{ borderBottom: "1px solid #2a2e3a", padding: "0 30px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
           <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.02em", color: "#e8eaed" }}>QuarterlyTax</span>
@@ -96,16 +91,13 @@ export default function App() {
         </div>
       </nav>
 
-      {/* DISCLAIMER */}
       <div style={{ borderBottom: "1px solid #2a2506", background: "#1a1708", padding: "6px 30px", fontSize: 11, color: "#a68a4b", textAlign: "center", fontWeight: 500 }}>
         Estimates based on simplified 2025 federal rates — not tax advice. Consult a professional before making payments.
       </div>
 
-      {/* MAIN */}
       <div style={{ flex: 1, maxWidth: 1360, margin: "0 auto", width: "100%", padding: "22px 30px" }}>
         <div className="qt-hero" style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
 
-          {/* LEFT */}
           <div className="qt-left" style={{ width: 340, flexShrink: 0 }}>
             <TaxInputs
               income={income} setIncome={setIncome}
@@ -124,9 +116,7 @@ export default function App() {
             />
           </div>
 
-          {/* RIGHT */}
           <div className="qt-right" style={{ flex: 1, minWidth: 0 }}>
-            {/* Right-column header zone */}
             <div style={{ marginBottom: 14 }}>
               <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.03em", color: "#e8eaed", lineHeight: 1.2, marginBottom: 4 }}>
                 {hasIncome
@@ -135,7 +125,7 @@ export default function App() {
                 }
               </h1>
               {hasIncome
-                ? <p style={{ fontSize: 13, color: "#fbbf24", fontWeight: 600 }}>Due {nd.due} — late or insufficient payments may incur IRS penalties.</p>
+                ? <p style={{ fontSize: 13, color: "#e0b84d", fontWeight: 600 }}>Due {nd.due} — late or insufficient payments may incur IRS penalties.</p>
                 : <p style={{ fontSize: 13, color: "#8b8f9a" }}>Federal + state + self-employment tax, calculated in real time.</p>
               }
             </div>
@@ -154,8 +144,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div style={{ borderTop: "1px solid #2a2e3a", padding: "14px 30px", textAlign: "center", fontSize: 11, color: "#6b7280" }}>
+      <div style={{ borderTop: "1px solid #2a2e3a", padding: "14px 30px", textAlign: "center", fontSize: 11, color: "#7a8394" }}>
         Not tax advice. Simplified 2025 rates. © {new Date().getFullYear()} QuarterlyTax
       </div>
 
