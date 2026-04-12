@@ -27,7 +27,7 @@ export default function App() {
   const [paychecksRemaining, setPaychecksRemaining] = useState(() => getPaychecksRemaining("biweekly"));
   const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
 
-  // Tax calculation — includes W-2 when toggled on
+  // Tax calculation
   const result = useMemo(
     () => calculateTax({
       income,
@@ -40,7 +40,7 @@ export default function App() {
     [income, deductions, status, state, hasW2, w2Income, w2Withholding]
   );
 
-  // Withholding offset — only computed when W-2 is active and withholding entered
+  // Withholding offset
   const withholding = useMemo(() => {
     if (!hasW2 || w2Withholding <= 0) return null;
     return calculateWithholdingOffset({
@@ -59,10 +59,8 @@ export default function App() {
     setPaidQuarters((p) => p.includes(i) ? p.filter((x) => x !== i) : [...p, i]);
   };
 
-  // Pay frequency change handler
   const handlePayFrequencyChange = (freq) => {
     setPayFrequency(freq);
-    // Always recalculate when frequency changes, reset manual flag
     setPaychecksRemaining(getPaychecksRemaining(freq));
     setPaychecksManuallyEdited(false);
   };
@@ -75,13 +73,15 @@ export default function App() {
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      color: "#111827", background: "#fff", minHeight: "100vh",
+      color: "#e8eaed",
+      background: "#0f1117",
+      minHeight: "100vh",
       display: "flex", flexDirection: "column",
     }}>
       <style>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
         ::selection { background: #0e7490; color: #fff; }
-        input::placeholder { color: #d1d5db; }
+        input::placeholder { color: #4b5060; }
         @media (max-width: 860px) {
           .qt-hero { flex-direction: column-reverse !important; gap: 20px !important; }
           .qt-left, .qt-right { width: 100% !important; min-width: 0 !important; }
@@ -89,15 +89,15 @@ export default function App() {
       `}</style>
 
       {/* NAV */}
-      <nav style={{ borderBottom: "1px solid #f3f4f6", padding: "0 30px" }}>
+      <nav style={{ borderBottom: "1px solid #2a2e3a", padding: "0 30px" }}>
         <div style={{ maxWidth: 1360, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 52 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.02em" }}>QuarterlyTax</span>
-          <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0e7490", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign in</button>
+          <span style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-.02em", color: "#e8eaed" }}>QuarterlyTax</span>
+          <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0ea5c9", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign in</button>
         </div>
       </nav>
 
       {/* DISCLAIMER */}
-      <div style={{ borderBottom: "1px solid #fef9c3", background: "#fefce8", padding: "6px 30px", fontSize: 11, color: "#92400e", textAlign: "center", fontWeight: 500 }}>
+      <div style={{ borderBottom: "1px solid #2a2506", background: "#1a1708", padding: "6px 30px", fontSize: 11, color: "#a68a4b", textAlign: "center", fontWeight: 500 }}>
         Estimates based on simplified 2025 federal rates — not tax advice. Consult a professional before making payments.
       </div>
 
@@ -128,15 +128,15 @@ export default function App() {
           <div className="qt-right" style={{ flex: 1, minWidth: 0 }}>
             {/* Right-column header zone */}
             <div style={{ marginBottom: 14 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.03em", color: "#111827", lineHeight: 1.2, marginBottom: 4 }}>
+              <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-.03em", color: "#e8eaed", lineHeight: 1.2, marginBottom: 4 }}>
                 {hasIncome
                   ? <>Your {nd.quarter} tax obligation is <span style={{ color: "#0e7490" }}>{formatUSD(result.quarterlyPayment)}</span></>
                   : "Enter your income to see your tax obligation"
                 }
               </h1>
               {hasIncome
-                ? <p style={{ fontSize: 13, color: "#b45309", fontWeight: 600 }}>Due {nd.due} — late or insufficient payments may incur IRS penalties.</p>
-                : <p style={{ fontSize: 13, color: "#6b7280" }}>Federal + state + self-employment tax, calculated in real time.</p>
+                ? <p style={{ fontSize: 13, color: "#fbbf24", fontWeight: 600 }}>Due {nd.due} — late or insufficient payments may incur IRS penalties.</p>
+                : <p style={{ fontSize: 13, color: "#8b8f9a" }}>Federal + state + self-employment tax, calculated in real time.</p>
               }
             </div>
 
@@ -155,7 +155,7 @@ export default function App() {
       </div>
 
       {/* FOOTER */}
-      <div style={{ borderTop: "1px solid #f3f4f6", padding: "14px 30px", textAlign: "center", fontSize: 11, color: "#9ca3af" }}>
+      <div style={{ borderTop: "1px solid #2a2e3a", padding: "14px 30px", textAlign: "center", fontSize: 11, color: "#6b7280" }}>
         Not tax advice. Simplified 2025 rates. © {new Date().getFullYear()} QuarterlyTax
       </div>
 
