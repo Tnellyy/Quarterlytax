@@ -14,7 +14,7 @@ export default function UpgradeModal({ open, onClose }) {
       }}>
         <button onClick={onClose} style={{
           position: "absolute", top: 16, right: 16,
-          background: "none", border: "none", fontSize: 18, color: "#737a87", cursor: "pointer",
+          background: "none", border: "none", fontSize: 18, color: "#7a8394", cursor: "pointer",
         }}>✕</button>
 
         <div style={{ fontSize: 22, fontWeight: 800, color: "#e8eaed", letterSpacing: "-.02em", marginBottom: 6 }}>
@@ -55,12 +55,12 @@ export default function UpgradeModal({ open, onClose }) {
         }}>
           Start tracking — $4/month
         </button>
-        <div style={{ fontSize: 11, color: "#737a87", textAlign: "center", marginBottom: 12 }}>
+        <div style={{ fontSize: 11, color: "#7a8394", textAlign: "center", marginBottom: 12 }}>
           Cancel anytime. No commitment.
         </div>
         <button onClick={onClose} style={{
           width: "100%", padding: "10px", background: "none", border: "none",
-          fontSize: 13, color: "#737a87", cursor: "pointer", fontFamily: "inherit",
+          fontSize: 13, color: "#7a8394", cursor: "pointer", fontFamily: "inherit",
         }}>
           Continue without saving
         </button>
