@@ -11,7 +11,7 @@ const selectStyle = {
   backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center",
 };
 
-const sLabel = { fontSize: 11, fontWeight: 700, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 10 };
+const sLabel = { fontSize: 11, fontWeight: 700, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".08em", marginBottom: 10 };
 const iLabel = { display: "block", fontSize: 12, fontWeight: 600, color: "#8b8f9a", marginBottom: 4 };
 
 export default function TaxInputs({
@@ -59,7 +59,7 @@ export default function TaxInputs({
         fontFamily: "inherit", borderTop: "1px solid #222530",
       }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: "#8b8f9a" }}>Business deductions</span>
-        <span style={{ fontSize: 12, color: "#8a919d", transform: showDeductions ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+        <span style={{ fontSize: 12, color: "#8f96a3", transform: showDeductions ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
       </button>
       {showDeductions && (
         <CurrencyInput label="Annual deductions" value={deductions} onChange={setDeductions}
@@ -77,7 +77,7 @@ export default function TaxInputs({
               flex: 1, padding: "8px 0", border: "none", borderRadius: 8,
               background: hasW2 === opt.key ? "#31384a" : "transparent",
               boxShadow: hasW2 === opt.key ? "0 1px 4px rgba(0,0,0,.4), inset 0 0 0 1px rgba(255,255,255,.04)" : "none",
-              color: hasW2 === opt.key ? "#e8eaed" : "#8a919d",
+              color: hasW2 === opt.key ? "#e8eaed" : "#8f96a3",
               fontWeight: 700, fontSize: 13, cursor: "pointer", fontFamily: "inherit", transition: "all .12s",
             }}>{opt.label}</button>
           ))}
@@ -113,7 +113,7 @@ export default function TaxInputs({
                 }}
               />
               {!paychecksManuallyEdited && (
-                <div style={{ fontSize: 10, color: "#8a919d", marginTop: 3 }}>Auto-estimated</div>
+                <div style={{ fontSize: 10, color: "#8f96a3", marginTop: 3 }}>Auto-estimated</div>
               )}
             </div>
           </div>
@@ -127,8 +127,8 @@ export default function TaxInputs({
         width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center",
         background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
       }}>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
-        <span style={{ color: "#8a919d", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".08em" }}>Safe harbor</span>
+        <span style={{ color: "#8f96a3", fontSize: 16, transition: "transform .2s", transform: showSafeHarbor ? "rotate(90deg)" : "none" }}>›</span>
       </button>
       {showSafeHarbor && (
         <div style={{ marginTop: 12 }}>
