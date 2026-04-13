@@ -26,19 +26,19 @@ const STATUS_STYLE = {
   paid:      { label: "Paid",      color: "#34d399", bg: "#0a2e23", icon: "✓" },
   overdue:   { label: "Overdue",   color: "#f87171", bg: "#2d0a0a", icon: "!" },
   due_today: { label: "Due today", color: "#f87171", bg: "#2d0a0a", icon: "!" },
-  due_soon:  { label: "Due soon",  color: "#e0b84d", bg: "#302814", icon: "●" },
+  due_soon:  { label: "Due soon",  color: "#e0b84d", bg: "#332c18", icon: "●" },
   current:   { label: "Current",   color: "#0ea5c9", bg: "#122b35", icon: "→" },
-  missed:    { label: "Missed",    color: "#8a919d", bg: "#202535", icon: "–" },
-  upcoming:  { label: "Upcoming",  color: "#8a919d", bg: "#202535", icon: "–" },
+  missed:    { label: "Missed",    color: "#8f96a3", bg: "#202535", icon: "–" },
+  upcoming:  { label: "Upcoming",  color: "#8f96a3", bg: "#202535", icon: "–" },
 };
 
 function getTaxHealth(statuses, paidCount) {
   if (paidCount === 0 && !statuses.includes("overdue") && !statuses.includes("due_today") && !statuses.includes("missed"))
-    return { label: "No payments logged", color: "#8a919d", bg: "#202535", border: "#202535" };
+    return { label: "No payments logged", color: "#8f96a3", bg: "#202535", border: "#202535" };
   if (statuses.includes("overdue") || statuses.includes("due_today") || statuses.includes("missed"))
-    return { label: "Action needed", color: "#e0b84d", bg: "#302814", border: "#302814" };
+    return { label: "Action needed", color: "#e0b84d", bg: "#332c18", border: "#332c18" };
   if (statuses.includes("due_soon"))
-    return { label: "Payment approaching", color: "#e0b84d", bg: "#302814", border: "#302814" };
+    return { label: "Payment approaching", color: "#e0b84d", bg: "#332c18", border: "#332c18" };
   return { label: "On track", color: "#34d399", bg: "#0a2e23", border: "#0a2e23" };
 }
 
@@ -65,12 +65,12 @@ export default function ResultsPanel({
         <div style={{ padding: `8px ${px}px`, display: "flex", alignItems: "center", gap: 10, background: health.bg, borderBottom: `1px solid ${health.border}` }}>
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: health.color, flexShrink: 0 }} />
           <span style={{ fontSize: 13, fontWeight: 700, color: health.color }}>{health.label}</span>
-          <span style={{ fontSize: 12, color: "#8a919d", marginLeft: "auto" }}>{paidCount} of 4 payments logged</span>
+          <span style={{ fontSize: 12, color: "#8f96a3", marginLeft: "auto" }}>{paidCount} of 4 payments logged</span>
         </div>
 
         {/* Hero */}
         <div style={{ padding: `18px ${px}px 14px` }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 5 }}>Quarterly payment</div>
+          <div style={{ fontSize: 11, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 5 }}>Quarterly payment</div>
           <div style={{ fontSize: 46, fontWeight: 800, letterSpacing: "-.04em", lineHeight: 1, color: "#e8eaed", fontVariantNumeric: "tabular-nums" }}>{$(result.quarterlyPayment)}</div>
         </div>
 
@@ -88,14 +88,14 @@ export default function ResultsPanel({
         {/* Metrics */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #222530" }}>
           <div style={{ padding: `12px ${px}px`, borderRight: "1px solid #222530" }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Monthly target</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Monthly target</div>
             <div style={{ fontSize: 19, fontWeight: 800, color: "#e8eaed", fontVariantNumeric: "tabular-nums" }}>
               {$(result.monthlySetAside)}<span style={{ fontSize: 12, fontWeight: 600, color: "#8b8f9a" }}>/mo</span>
             </div>
             <div style={{ fontSize: 11, color: "#34d399", fontWeight: 600, marginTop: 1 }}>Set aside monthly to stay on track</div>
           </div>
           <div style={{ padding: `12px ${px}px` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Effective rate</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Effective rate</div>
             <div style={{ fontSize: 19, fontWeight: 800, color: "#e8eaed" }}>{P(result.effectiveRate)}</div>
             {result.effectiveRate > 0 && result.effectiveRate < result.marginalRate * 0.8 && (
               <div style={{ fontSize: 11, color: "#8b8f9a", fontWeight: 500, marginTop: 1 }}>Below your {P(result.marginalRate)} marginal bracket</div>
@@ -105,7 +105,7 @@ export default function ResultsPanel({
 
         {/* Quarterly obligations */}
         <div style={{ borderTop: "1px solid #222530", padding: `12px ${px}px` }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8 }}>Quarterly obligations</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8 }}>Quarterly obligations</div>
           {DEADLINES.map((q, i) => {
             const st = statuses[i];
             const cfg = STATUS_STYLE[st];
@@ -116,8 +116,8 @@ export default function ResultsPanel({
                 padding: "7px 0", borderBottom: i < 3 ? "1px solid #222530" : "none",
               }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0ea5c9" : "#8a919d", width: 22 }}>{q.quarter}</span>
-                  <span style={{ fontSize: 12, color: "#8a919d" }}>Due {q.due}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0ea5c9" : "#8f96a3", width: 22 }}>{q.quarter}</span>
+                  <span style={{ fontSize: 12, color: "#8f96a3" }}>Due {q.due}</span>
                   <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg, padding: "2px 8px", borderRadius: 4 }}>
                     {cfg.icon} {cfg.label}
                   </span>
@@ -125,7 +125,7 @@ export default function ResultsPanel({
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{
                     fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums",
-                    color: st === "paid" || st === "missed" ? "#8a919d" : isActive ? "#0e7490" : "#e8eaed",
+                    color: st === "paid" || st === "missed" ? "#8f96a3" : isActive ? "#0e7490" : "#e8eaed",
                     textDecoration: st === "paid" ? "line-through" : "none",
                   }}>{$(result.quarterlyPayment)}</span>
                   <button onClick={() => onTogglePaid(i)} style={{
@@ -133,14 +133,14 @@ export default function ResultsPanel({
                     fontFamily: "inherit", transition: "all .12s",
                     background: st === "paid" ? "#0a2e23" : "#202535",
                     border: st === "paid" ? "1px solid #0a2e23" : "1px solid #2a2e3a",
-                    color: st === "paid" ? "#34d399" : "#959aa5",
+                    color: st === "paid" ? "#34d399" : "#9da2ad",
                   }}>{st === "paid" ? "Paid ✓" : "Log payment"}</button>
                 </div>
               </div>
             );
           })}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 6, paddingTop: 8, borderTop: "1px solid #2a2e3a" }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#8a919d" }}>Total {new Date().getFullYear()}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#8f96a3" }}>Total {new Date().getFullYear()}</span>
             <span style={{ fontSize: 17, fontWeight: 800, fontVariantNumeric: "tabular-nums", color: "#e8eaed" }}>{$(result.totalAnnualTax)}</span>
           </div>
         </div>
@@ -148,10 +148,10 @@ export default function ResultsPanel({
         {/* Withholding check */}
         {hasW2 && (
           <div style={{ borderTop: "1px solid #222530", padding: `12px ${px}px` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8 }}>Withholding check</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8 }}>Withholding check</div>
 
             {w2Withholding <= 0 && (
-              <div style={{ fontSize: 13, color: "#8a919d", lineHeight: 1.6 }}>Enter your federal withholding to see your options.</div>
+              <div style={{ fontSize: 13, color: "#8f96a3", lineHeight: 1.6 }}>Enter your federal withholding to see your options.</div>
             )}
 
             {w2Withholding > 0 && paychecksRemaining === 0 && (
@@ -187,7 +187,7 @@ export default function ResultsPanel({
                     )}
                   </div>
                 )}
-                <div style={{ fontSize: 11, color: "#8a919d", marginTop: 6 }}>Estimate based on inputs provided. Actual withholding depends on your W-4 and employer payroll.</div>
+                <div style={{ fontSize: 11, color: "#8f96a3", marginTop: 6 }}>Estimate based on inputs provided. Actual withholding depends on your W-4 and employer payroll.</div>
               </div>
             )}
           </div>
@@ -210,12 +210,12 @@ export default function ResultsPanel({
 
         {/* Warning */}
         <div style={{
-          borderTop: "1px solid #302a12", padding: `7px ${px}px`, background: "#28220f",
+          borderTop: "1px solid #342e16", padding: `7px ${px}px`, background: "#2c2512",
           display: "flex", alignItems: "center", gap: 8, borderRadius: "0 0 12px 12px",
         }}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 1L1 13h12L7 1z" fill="#e0b84d" />
-            <text x="7" y="11" textAnchor="middle" fill="#28220f" fontSize="8" fontWeight="800">!</text>
+            <text x="7" y="11" textAnchor="middle" fill="#2c2512" fontSize="8" fontWeight="800">!</text>
           </svg>
           <span style={{ fontSize: 12, fontWeight: 500, color: "#e0b84d" }}>Underpayment may result in IRS penalties and interest charges</span>
         </div>
@@ -230,7 +230,7 @@ export default function ResultsPanel({
             { label: "SE Tax", value: $(result.quarterlySE) },
           ].map((item, i) => (
             <div key={i} style={{ textAlign: "center", padding: "3px 0", borderRight: i < 2 ? "1px solid #222530" : "none" }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "#8a919d", textTransform: "uppercase", letterSpacing: ".05em" }}>{item.label}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em" }}>{item.label}</div>
               <div style={{ fontSize: 14, fontWeight: 800, color: "#e8eaed", marginTop: 1, fontVariantNumeric: "tabular-nums" }}>{item.value}</div>
             </div>
           ))}
@@ -241,7 +241,7 @@ export default function ResultsPanel({
       <div style={{ display: "flex", gap: 10, marginTop: 5 }}>
         <button onClick={() => { if (allPaid) return; const n = statuses.findIndex(s => s !== "paid"); if (n >= 0) onTogglePaid(n); }} style={{
           flex: 1, textAlign: "center", padding: "14px",
-          background: allPaid ? "#2a2e3a" : "#e8eaed", color: allPaid ? "#8a919d" : "#0f1117",
+          background: allPaid ? "#2a2e3a" : "#e8eaed", color: allPaid ? "#8f96a3" : "#0f1117",
           borderRadius: 10, fontWeight: 700, fontSize: 14, fontFamily: "inherit",
           border: "none", cursor: allPaid ? "default" : "pointer",
         }}>
@@ -249,14 +249,14 @@ export default function ResultsPanel({
         </button>
         <a href="https://directpay.irs.gov" target="_blank" rel="noopener noreferrer" style={{
           padding: "12px 18px", background: "transparent", border: "1px solid #2a2e3a", borderRadius: 10,
-          fontWeight: 600, fontSize: 13, color: "#959aa5", textDecoration: "none", fontFamily: "inherit",
+          fontWeight: 600, fontSize: 13, color: "#9da2ad", textDecoration: "none", fontFamily: "inherit",
           display: "flex", alignItems: "center",
         }}>IRS.gov ↗</a>
       </div>
 
       {/* Disclaimer */}
-      <div style={{ marginTop: 10, fontSize: 11, color: "#8a919d", lineHeight: 1.6 }}>
-        <strong style={{ color: "#959aa5" }}>Not tax advice.</strong> Simplified 2025 federal brackets and flat state rates. Does not account for AMT, Medicare surtax, state-specific deductions, credits, or local taxes.
+      <div style={{ marginTop: 10, fontSize: 11, color: "#8f96a3", lineHeight: 1.6 }}>
+        <strong style={{ color: "#9da2ad" }}>Not tax advice.</strong> Simplified 2025 federal brackets and flat state rates. Does not account for AMT, Medicare surtax, state-specific deductions, credits, or local taxes.
       </div>
     </div>
   );
