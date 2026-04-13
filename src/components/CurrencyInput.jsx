@@ -19,7 +19,7 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
         borderRadius: 10, background: focused ? "#2b3142" : "#202535",
         padding: "0 12px", transition: "all .15s",
       }}>
-        <span style={{ color: "#8a919d", fontSize: 15, fontWeight: 500 }}>$</span>
+        <span style={{ color: "#8f96a3", fontSize: 15, fontWeight: 500 }}>$</span>
         <input type="text" inputMode="numeric" value={raw} placeholder="0"
           onFocus={() => { setFocused(true); setRaw(value === 0 ? "" : String(value)); }}
           onBlur={() => { setFocused(false); onChange(parseInt(raw.replace(/\D/g, ""), 10) || 0); }}
@@ -32,7 +32,7 @@ export default function CurrencyInput({ label, value, onChange, subtitle }) {
         />
       </div>
       {subtitle && (
-        <div style={{ fontSize: 11, color: "#8a919d", marginTop: 3, lineHeight: 1.4 }}>{subtitle}</div>
+        <div style={{ fontSize: 11, color: "#8f96a3", marginTop: 3, lineHeight: 1.4 }}>{subtitle}</div>
       )}
     </div>
   );
