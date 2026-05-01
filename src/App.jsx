@@ -6,8 +6,13 @@ import {
 import TaxInputs from "./components/TaxInputs";
 import ResultsPanel from "./components/ResultsPanel";
 import UpgradeModal from "./components/UpgradeModal";
+import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
+  // Auth state — wired at root, used by future batches
+  const auth = useAuth();
+
+  // Core inputs
   const [income, setIncome] = useState(85000);
   const [state, setState] = useState("CA");
   const [status, setStatus] = useState("single");
@@ -18,6 +23,7 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [paidQuarters, setPaidQuarters] = useState([]);
 
+  // W-2 inputs
   const [hasW2, setHasW2] = useState(false);
   const [w2Income, setW2Income] = useState(0);
   const [w2Withholding, setW2Withholding] = useState(0);
@@ -25,6 +31,7 @@ export default function App() {
   const [paychecksRemaining, setPaychecksRemaining] = useState(() => getPaychecksRemaining("biweekly"));
   const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
 
+  // Tax calculation
   const result = useMemo(
     () => calculateTax({
       income, deductions, filingStatus: status, stateCode: state,
@@ -33,6 +40,7 @@ export default function App() {
     [income, deductions, status, state, hasW2, w2Income, w2Withholding]
   );
 
+  // Withholding offset
   const withholding = useMemo(() => {
     if (!hasW2 || w2Withholding <= 0) return null;
     return calculateWithholdingOffset({
