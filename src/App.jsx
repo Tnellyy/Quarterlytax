@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import {
   calculateTax, calculateWithholdingOffset, getPaychecksRemaining,
   formatUSD, getNextDeadline, daysUntilDeadline,
@@ -29,6 +29,33 @@ export default function App() {
   const [payFrequency, setPayFrequency] = useState("biweekly");
   const [paychecksRemaining, setPaychecksRemaining] = useState(() => getPaychecksRemaining("biweekly"));
   const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
+
+  // Checkout success return handling
+  const [checkoutReturn, setCheckoutReturn] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("checkout") === "success";
+  });
+  const checkoutHandled = useRef(false);
+
+  // Detect and strip ?checkout=success on mount
+  useEffect(() => {
+    if (!checkoutReturn) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("checkout");
+    window.history.replaceState({}, "", url.pathname);
+    setShowModal(false);
+  }, [checkoutReturn]);
+
+  // Refresh subscription once auth is ready after checkout return
+  useEffect(() => {
+    if (!checkoutReturn) return;
+    if (checkoutHandled.current) return;
+    if (auth.authLoading || !auth.user) return;
+
+    checkoutHandled.current = true;
+    auth.refreshSubscription(auth.user.id);
+    setCheckoutReturn(false);
+  }, [checkoutReturn, auth.authLoading, auth.user, auth.refreshSubscription]);
 
   // Tax calculation
   const result = useMemo(
@@ -86,6 +113,9 @@ export default function App() {
                 <span style={{ fontSize: 12, color: "#8f96a3", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {auth.user.email}
                 </span>
+                {auth.isPaid && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#34d399", background: "#0a2e23", padding: "2px 7px", borderRadius: 4 }}>PRO</span>
+                )}
                 <button onClick={auth.signOut} style={{ fontSize: 13, fontWeight: 600, color: "#8f96a3", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign out</button>
               </>
             ) : (
