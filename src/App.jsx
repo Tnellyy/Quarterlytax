@@ -5,11 +5,10 @@ import {
 } from "./engine/tax";
 import TaxInputs from "./components/TaxInputs";
 import ResultsPanel from "./components/ResultsPanel";
-import UpgradeModal from "./components/UpgradeModal";
+import AuthModal from "./components/AuthModal";
 import { useAuth } from "./hooks/useAuth";
 
 export default function App() {
-  // Auth state — wired at root, used by future batches
   const auth = useAuth();
 
   // Core inputs
@@ -78,7 +77,21 @@ export default function App() {
             </svg>
             <span style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-.02em", color: "#e8eaed" }}>QuarterlyTax</span>
           </div>
-          <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0ea5c9", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Join waitlist</button>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            {auth.authLoading ? (
+              <span style={{ fontSize: 13, color: "#8f96a3" }}>…</span>
+            ) : auth.isAuthenticated ? (
+              <>
+                <span style={{ fontSize: 12, color: "#8f96a3", maxWidth: 180, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {auth.user.email}
+                </span>
+                <button onClick={auth.signOut} style={{ fontSize: 13, fontWeight: 600, color: "#8f96a3", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign out</button>
+              </>
+            ) : (
+              <button onClick={() => setShowModal(true)} style={{ fontSize: 13, fontWeight: 600, color: "#0ea5c9", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign in</button>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -124,7 +137,7 @@ export default function App() {
         Not tax advice. Simplified 2025 rates. © {new Date().getFullYear()} QuarterlyTax
       </div>
 
-      <UpgradeModal open={showModal} onClose={() => setShowModal(false)} />
+      <AuthModal open={showModal} onClose={() => setShowModal(false)} auth={auth} />
     </div>
   );
 }
