@@ -45,6 +45,7 @@ function getTaxHealth(statuses, paidCount) {
 export default function ResultsPanel({
   result, paidQuarters, onTogglePaid, onTrack,
   withholding, hasW2, w2Withholding, paychecksRemaining,
+  isAuthenticated, isPaid,
 }) {
   const nd = getNextDeadline();
   const days = daysUntilDeadline(nd);
@@ -193,20 +194,56 @@ export default function ResultsPanel({
           </div>
         )}
 
-        {/* CTA — honest waitlist */}
-        <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#122b35" }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "#0ea5c9", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>Coming soon</div>
-          <button onClick={onTrack} style={{
-            width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-            background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
-          }}>
-            <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: "#e8eaed", textAlign: "left" }}>Payment tracking is on the way</div>
-              <div style={{ fontSize: 12, color: "#8b8f9a", textAlign: "left" }}>Saved quarters. Deadline reminders. Quarter-by-quarter tracking.</div>
+        {/* ═══ CTA AREA — 3 states ═══ */}
+
+        {/* State 1: Paid user — tracking active */}
+        {isPaid && (
+          <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#0a2e23" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3 8l3.5 3.5 6.5-6.5" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span style={{ fontSize: 14, fontWeight: 700, color: "#34d399" }}>Tracking active</span>
             </div>
-            <span style={{ fontSize: 13, fontWeight: 800, color: "#0f1117", background: "#0ea5c9", padding: "9px 16px", borderRadius: 8, flexShrink: 0 }}>Join waitlist</span>
-          </button>
-        </div>
+            <div style={{ fontSize: 12, color: "#8b8f9a", marginTop: 3, paddingLeft: 24 }}>
+              Saved payment history is enabled for this account.
+            </div>
+          </div>
+        )}
+
+        {/* State 2: Signed in, not paid — upgrade CTA */}
+        {isAuthenticated && !isPaid && (
+          <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#122b35" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#0ea5c9", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>Unlock tracking</div>
+            <button onClick={onTrack} style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
+            }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#e8eaed", textAlign: "left" }}>Save your payment history</div>
+                <div style={{ fontSize: 12, color: "#8b8f9a", textAlign: "left" }}>Saved quarters. Deadline reminders. Quarter-by-quarter tracking.</div>
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 800, color: "#0f1117", background: "#0ea5c9", padding: "9px 16px", borderRadius: 8, flexShrink: 0 }}>Start tracking — $4/mo</span>
+            </button>
+          </div>
+        )}
+
+        {/* State 3: Anonymous — sign up CTA */}
+        {!isAuthenticated && (
+          <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#122b35" }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: "#0ea5c9", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>Next step</div>
+            <button onClick={onTrack} style={{
+              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+              background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
+            }}>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "#e8eaed", textAlign: "left" }}>Keep your payment history</div>
+                <div style={{ fontSize: 12, color: "#8b8f9a", textAlign: "left" }}>Sign up to save quarters, get reminders, and track every payment.</div>
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 800, color: "#0f1117", background: "#0ea5c9", padding: "9px 16px", borderRadius: 8, flexShrink: 0 }}>Sign up — $4/mo</span>
+            </button>
+          </div>
+        )}
 
         {/* Warning */}
         <div style={{
