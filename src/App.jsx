@@ -51,7 +51,6 @@ export default function App() {
     if (!checkoutReturn) return;
     if (checkoutHandled.current) return;
     if (auth.authLoading || !auth.user) return;
-
     checkoutHandled.current = true;
     auth.refreshSubscription(auth.user.id);
     setCheckoutReturn(false);
@@ -158,7 +157,8 @@ export default function App() {
             </div>
             <ResultsPanel result={result} paidQuarters={paidQuarters} onTogglePaid={togglePaid}
               onTrack={() => setShowModal(true)} withholding={withholding} hasW2={hasW2}
-              w2Withholding={w2Withholding} paychecksRemaining={paychecksRemaining} />
+              w2Withholding={w2Withholding} paychecksRemaining={paychecksRemaining}
+              isAuthenticated={auth.isAuthenticated} isPaid={auth.isPaid} />
           </div>
         </div>
       </div>
