@@ -202,6 +202,9 @@ export default function App() {
                 {auth.isPaid && (
                   <span style={{ fontSize: 10, fontWeight: 700, color: "#34d399", background: "#0a2e23", padding: "2px 7px", borderRadius: 4 }}>PRO</span>
                 )}
+                {auth.isPaid && (
+                  <button onClick={() => setShowModal(true)} style={{ fontSize: 12, fontWeight: 600, color: "#8f96a3", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Manage billing</button>
+                )}
                 <button onClick={auth.signOut} style={{ fontSize: 13, fontWeight: 600, color: "#8f96a3", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Sign out</button>
               </>
             ) : (
