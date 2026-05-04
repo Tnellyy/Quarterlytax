@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   calculateTax, calculateWithholdingOffset, getPaychecksRemaining,
   formatUSD, getNextDeadline, daysUntilDeadline,
@@ -30,14 +30,18 @@ export default function App() {
   const [paychecksRemaining, setPaychecksRemaining] = useState(() => getPaychecksRemaining("biweekly"));
   const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
 
-  // Checkout success return handling
+  // ─── Persistence guards ───
+  const stateLoaded = useRef(false);    // true after load completes (or confirms no saved state)
+  const saveTimer = useRef(null);       // debounce timer for auto-save
+  const loadAttempted = useRef(false);  // prevent duplicate load calls
+
+  // ─── Checkout success return handling ───
   const [checkoutReturn, setCheckoutReturn] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get("checkout") === "success";
   });
   const checkoutHandled = useRef(false);
 
-  // Detect and strip ?checkout=success on mount
   useEffect(() => {
     if (!checkoutReturn) return;
     const url = new URL(window.location.href);
@@ -46,7 +50,6 @@ export default function App() {
     setShowModal(false);
   }, [checkoutReturn]);
 
-  // Refresh subscription once auth is ready after checkout return
   useEffect(() => {
     if (!checkoutReturn) return;
     if (checkoutHandled.current) return;
@@ -56,7 +59,91 @@ export default function App() {
     setCheckoutReturn(false);
   }, [checkoutReturn, auth.authLoading, auth.user, auth.refreshSubscription]);
 
-  // Tax calculation
+  // ─── Load saved state for paid users ───
+  useEffect(() => {
+    if (auth.authLoading) return;
+    if (!auth.isPaid) {
+      stateLoaded.current = false;
+      loadAttempted.current = false;
+      return;
+    }
+    if (loadAttempted.current) return;
+    if (!auth.session?.access_token) return;
+
+    loadAttempted.current = true;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/load-state", {
+          headers: { Authorization: `Bearer ${auth.session.access_token}` },
+        });
+        if (res.ok) {
+          const { state: saved } = await res.json();
+          if (saved) {
+            setIncome(saved.income ?? 85000);
+            setState(saved.state_code ?? "CA");
+            setStatus(saved.filing_status ?? "single");
+            setDeductions(saved.deductions ?? 0);
+            setHasW2(saved.has_w2 ?? false);
+            setW2Income(saved.w2_income ?? 0);
+            setW2Withholding(saved.w2_withholding ?? 0);
+            setPayFrequency(saved.pay_frequency ?? "biweekly");
+            setPaychecksRemaining(saved.paychecks_remaining ?? getPaychecksRemaining("biweekly"));
+            setPaidQuarters(saved.paid_quarters ?? []);
+            setLastYearTax(saved.last_year_tax ?? 0);
+          }
+        }
+      } catch (err) {
+        console.error("Load state failed:", err);
+      }
+      // Mark loaded whether we got data or not — safe to save now
+      stateLoaded.current = true;
+    })();
+  }, [auth.authLoading, auth.isPaid, auth.session]);
+
+  // ─── Auto-save for paid users (debounced 2s) ───
+  const saveState = useCallback(() => {
+    if (!auth.isPaid) return;
+    if (!stateLoaded.current) return;
+    if (!auth.session?.access_token) return;
+
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+
+    saveTimer.current = setTimeout(async () => {
+      try {
+        await fetch("/api/save-state", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${auth.session.access_token}`,
+          },
+          body: JSON.stringify({
+            income,
+            state_code: state,
+            filing_status: status,
+            deductions,
+            has_w2: hasW2,
+            w2_income: w2Income,
+            w2_withholding: w2Withholding,
+            pay_frequency: payFrequency,
+            paychecks_remaining: paychecksRemaining,
+            paid_quarters: paidQuarters,
+            last_year_tax: lastYearTax,
+          }),
+        });
+      } catch (err) {
+        console.error("Save state failed:", err);
+      }
+    }, 2000);
+  }, [auth.isPaid, auth.session, income, state, status, deductions, hasW2, w2Income, w2Withholding, payFrequency, paychecksRemaining, paidQuarters, lastYearTax]);
+
+  // Trigger save when any saveable state changes
+  useEffect(() => {
+    saveState();
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [saveState]);
+
+  // ─── Tax calculation ───
   const result = useMemo(
     () => calculateTax({
       income, deductions, filingStatus: status, stateCode: state,
