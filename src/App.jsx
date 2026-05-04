@@ -31,9 +31,9 @@ export default function App() {
   const [paychecksManuallyEdited, setPaychecksManuallyEdited] = useState(false);
 
   // ─── Persistence guards ───
-  const stateLoaded = useRef(false);    // true after load completes (or confirms no saved state)
-  const saveTimer = useRef(null);       // debounce timer for auto-save
-  const loadAttempted = useRef(false);  // prevent duplicate load calls
+  const stateLoaded = useRef(false);
+  const saveTimer = useRef(null);
+  const loadAttempted = useRef(false);
 
   // ─── Checkout success return handling ───
   const [checkoutReturn, setCheckoutReturn] = useState(() => {
@@ -96,7 +96,6 @@ export default function App() {
       } catch (err) {
         console.error("Load state failed:", err);
       }
-      // Mark loaded whether we got data or not — safe to save now
       stateLoaded.current = true;
     })();
   }, [auth.authLoading, auth.isPaid, auth.session]);
@@ -137,11 +136,15 @@ export default function App() {
     }, 2000);
   }, [auth.isPaid, auth.session, income, state, status, deductions, hasW2, w2Income, w2Withholding, payFrequency, paychecksRemaining, paidQuarters, lastYearTax]);
 
-  // Trigger save when any saveable state changes
   useEffect(() => {
     saveState();
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [saveState]);
+
+  // ─── Cancellation label ───
+  const cancelLabel = auth.isPaid && auth.cancelAtPeriodEnd && auth.currentPeriodEnd
+    ? `Cancels ${new Date(auth.currentPeriodEnd).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+    : null;
 
   // ─── Tax calculation ───
   const result = useMemo(
@@ -152,7 +155,6 @@ export default function App() {
     [income, deductions, status, state, hasW2, w2Income, w2Withholding]
   );
 
-  // Withholding offset
   const withholding = useMemo(() => {
     if (!hasW2 || w2Withholding <= 0) return null;
     return calculateWithholdingOffset({
@@ -201,6 +203,9 @@ export default function App() {
                 </span>
                 {auth.isPaid && (
                   <span style={{ fontSize: 10, fontWeight: 700, color: "#34d399", background: "#0a2e23", padding: "2px 7px", borderRadius: 4 }}>PRO</span>
+                )}
+                {cancelLabel && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#e0b84d", background: "#332c18", padding: "2px 7px", borderRadius: 4 }}>{cancelLabel}</span>
                 )}
                 {auth.isPaid && (
                   <button onClick={() => setShowModal(true)} style={{ fontSize: 12, fontWeight: 600, color: "#8f96a3", background: "none", border: "none", cursor: "pointer", fontFamily: "inherit" }}>Manage billing</button>
