@@ -23,6 +23,15 @@ function tsToISO(ts) {
   return ts ? new Date(ts * 1000).toISOString() : null;
 }
 
+function getCurrentPeriodEnd(subscription) {
+  return (
+    subscription.current_period_end ||
+    subscription.items?.data?.[0]?.current_period_end ||
+    subscription.cancel_at ||
+    null
+  );
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -64,7 +73,7 @@ export default async function handler(req, res) {
             status: subscription.status,
             stripe_customer_id: stripeCustomerId,
             stripe_subscription_id: stripeSubscriptionId,
-            current_period_end: tsToISO(subscription.current_period_end),
+            current_period_end: tsToISO(getCurrentPeriodEnd(subscription)),
             cancel_at_period_end: subscription.cancel_at_period_end || false,
             canceled_at: tsToISO(subscription.canceled_at),
             updated_at: new Date().toISOString(),
@@ -87,7 +96,7 @@ export default async function handler(req, res) {
         .from("subscriptions")
         .update({
           status: subscription.status,
-          current_period_end: tsToISO(subscription.current_period_end),
+          current_period_end: tsToISO(getCurrentPeriodEnd(subscription)),
           cancel_at_period_end: subscription.cancel_at_period_end || false,
           canceled_at: tsToISO(subscription.canceled_at),
           updated_at: new Date().toISOString(),
@@ -109,7 +118,7 @@ export default async function handler(req, res) {
         .from("subscriptions")
         .update({
           status: "cancelled",
-          current_period_end: tsToISO(subscription.current_period_end),
+          current_period_end: tsToISO(getCurrentPeriodEnd(subscription)),
           cancel_at_period_end: false,
           canceled_at: tsToISO(subscription.canceled_at) || new Date().toISOString(),
           updated_at: new Date().toISOString(),
