@@ -7,6 +7,7 @@ export default function AuthModal({ open, onClose, auth }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   // Determine which view to show
   const showCheckout = auth.isAuthenticated && !auth.isPaid && auth.subscriptionStatus !== "loading";
@@ -18,6 +19,7 @@ export default function AuthModal({ open, onClose, auth }) {
       setError("");
       setLoading(false);
       setCheckoutLoading(false);
+      setPortalLoading(false);
     }
   }, [open]);
 
@@ -29,6 +31,7 @@ export default function AuthModal({ open, onClose, auth }) {
     setPassword("");
     setLoading(false);
     setCheckoutLoading(false);
+    setPortalLoading(false);
     onClose();
   };
 
@@ -46,7 +49,6 @@ export default function AuthModal({ open, onClose, auth }) {
     if (authError) {
       setError(authError.message);
     }
-    // If auth succeeds, the hook updates state → showCheckout becomes true automatically
   };
 
   const handleCheckout = async () => {
@@ -77,11 +79,45 @@ export default function AuthModal({ open, onClose, auth }) {
         return;
       }
 
-      // Redirect to Stripe Checkout
       window.location.href = data.url;
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setCheckoutLoading(false);
+    }
+  };
+
+  const handlePortal = async () => {
+    setError("");
+    setPortalLoading(true);
+
+    try {
+      const token = auth.session?.access_token;
+      if (!token) {
+        setError("Session expired. Please sign in again.");
+        setPortalLoading(false);
+        return;
+      }
+
+      const res = await fetch("/api/create-portal", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        setError(data.error || "Failed to open billing portal. Please try again.");
+        setPortalLoading(false);
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      setPortalLoading(false);
     }
   };
 
@@ -261,7 +297,7 @@ export default function AuthModal({ open, onClose, auth }) {
           </>
         )}
 
-        {/* ── ALREADY PAID (edge case) ── */}
+        {/* ── ALREADY PAID ── */}
         {auth.isAuthenticated && auth.isPaid && (
           <div style={{ textAlign: "center", padding: "12px 0" }}>
             <div style={{ width: 40, height: 40, borderRadius: 10, background: "#0a2e23", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
@@ -273,11 +309,31 @@ export default function AuthModal({ open, onClose, auth }) {
             <div style={{ fontSize: 13, color: "#8b8f9a", marginBottom: 20, lineHeight: 1.6 }}>
               Your QuarterlyTax Pro subscription is active.
             </div>
+
+            {error && (
+              <div style={{
+                fontSize: 13, color: "#f87171", background: "#2d0a0a", border: "1px solid #450a0a",
+                borderRadius: 8, padding: "10px 12px", marginBottom: 14, lineHeight: 1.4, textAlign: "left",
+              }}>{error}</div>
+            )}
+
             <button onClick={handleClose} style={{
               width: "100%", padding: "12px", background: "#202535", color: "#e8eaed",
               borderRadius: 10, fontWeight: 700, fontSize: 14, border: "1px solid #2a2e3a",
-              cursor: "pointer", fontFamily: "inherit",
+              cursor: "pointer", fontFamily: "inherit", marginBottom: 10,
             }}>Close</button>
+
+            <button
+              onClick={handlePortal}
+              disabled={portalLoading}
+              style={{
+                width: "100%", padding: "10px", background: "none", border: "none",
+                fontSize: 13, color: "#8f96a3", cursor: portalLoading ? "default" : "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              {portalLoading ? "Opening billing portal…" : "Manage billing"}
+            </button>
           </div>
         )}
       </div>
