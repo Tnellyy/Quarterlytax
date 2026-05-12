@@ -3,6 +3,26 @@ import {
   getNextDeadline, daysUntilDeadline, getUrgencyColor,
 } from "../engine/tax";
 
+const C = {
+  bg: "#0B0F14",
+  panel: "#151A22",
+  panel2: "#1B2230",
+  panelHover: "#222B3A",
+  border: "#2A3442",
+  borderSubtle: "#1E2530",
+  textMain: "#F4F7FA",
+  textMuted: "#A7B0BD",
+  textDim: "#6E7886",
+  teal: "#14B8D6",
+  tealBg: "#0A2F39",
+  green: "#22C55E",
+  greenBg: "#0F2E1F",
+  yellow: "#F5C542",
+  yellowBg: "#2F2814",
+  red: "#EF4444",
+  redBg: "#2E1313",
+};
+
 function getQuarterStatuses(paidQuarters) {
   const now = new Date();
   const statuses = [];
@@ -17,29 +37,31 @@ function getQuarterStatuses(paidQuarters) {
       else if (days === 0) statuses.push("due_today");
       else if (days <= 14) statuses.push("due_soon");
       else statuses.push("current");
-    } else { statuses.push(days < 0 ? "missed" : "upcoming"); }
+    } else {
+      statuses.push(days < 0 ? "missed" : "upcoming");
+    }
   }
   return statuses;
 }
 
 const STATUS_STYLE = {
-  paid:      { label: "Paid",      color: "#34d399", bg: "#0a2e23", icon: "✓" },
-  overdue:   { label: "Overdue",   color: "#f87171", bg: "#2d0a0a", icon: "!" },
-  due_today: { label: "Due today", color: "#f87171", bg: "#2d0a0a", icon: "!" },
-  due_soon:  { label: "Due soon",  color: "#e0b84d", bg: "#332c18", icon: "●" },
-  current:   { label: "Current",   color: "#0ea5c9", bg: "#122b35", icon: "→" },
-  missed:    { label: "Missed",    color: "#8f96a3", bg: "#202535", icon: "–" },
-  upcoming:  { label: "Upcoming",  color: "#8f96a3", bg: "#202535", icon: "–" },
+  paid:      { label: "Paid",      color: C.green,  bg: C.greenBg,  icon: "✓" },
+  overdue:   { label: "Overdue",   color: C.red,    bg: C.redBg,    icon: "!" },
+  due_today: { label: "Due today", color: C.red,    bg: C.redBg,    icon: "!" },
+  due_soon:  { label: "Due soon",  color: C.yellow, bg: C.yellowBg, icon: "●" },
+  current:   { label: "Next up",   color: C.teal,   bg: C.tealBg,   icon: "→" },
+  missed:    { label: "Missed",    color: C.textMuted, bg: C.panel2, icon: "—" },
+  upcoming:  { label: "Upcoming",  color: C.textMuted, bg: C.panel2, icon: "—" },
 };
 
 function getTaxHealth(statuses, paidCount) {
   if (paidCount === 0 && !statuses.includes("overdue") && !statuses.includes("due_today") && !statuses.includes("missed"))
-    return { label: "No payments logged", color: "#8f96a3", bg: "#202535", border: "#202535" };
+    return { label: "Awaiting first payment", color: C.textMuted, bg: C.panel2 };
   if (statuses.includes("overdue") || statuses.includes("due_today") || statuses.includes("missed"))
-    return { label: "Action needed", color: "#e0b84d", bg: "#332c18", border: "#332c18" };
+    return { label: "Action needed", color: C.yellow, bg: C.yellowBg };
   if (statuses.includes("due_soon"))
-    return { label: "Payment approaching", color: "#e0b84d", bg: "#332c18", border: "#332c18" };
-  return { label: "On track", color: "#34d399", bg: "#0a2e23", border: "#0a2e23" };
+    return { label: "Payment approaching", color: C.yellow, bg: C.yellowBg };
+  return { label: "On track", color: C.green, bg: C.greenBg };
 }
 
 export default function ResultsPanel({
@@ -55,245 +77,316 @@ export default function ResultsPanel({
   const statuses = getQuarterStatuses(paidQuarters);
   const paidCount = paidQuarters.length;
   const health = getTaxHealth(statuses, paidCount);
-  const px = 22;
   const allPaid = paidCount === 4;
+  const nextUnpaidIdx = statuses.findIndex(s => s !== "paid");
+  const nextQuarterLabel = nextUnpaidIdx >= 0 ? DEADLINES[nextUnpaidIdx].quarter : null;
+  const totalPaid = paidCount * result.quarterlyPayment;
+  const remaining = Math.max(0, result.totalAnnualTax - totalPaid);
+
+  const cardBase = {
+    background: C.panel, border: `1px solid ${C.border}`,
+    borderRadius: 14, overflow: "hidden",
+  };
 
   return (
-    <div>
-      <div style={{ border: "1px solid #2a2e3a", borderRadius: 12, background: "#181b23", overflow: "hidden" }}>
-
-        {/* Health */}
-        <div style={{ padding: `8px ${px}px`, display: "flex", alignItems: "center", gap: 10, background: health.bg, borderBottom: `1px solid ${health.border}` }}>
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: health.color, flexShrink: 0 }} />
+    <div className="qt-results-grid" style={{
+      display: "grid", gridTemplateColumns: "minmax(0, 1fr) 360px", gap: 20, alignItems: "start",
+    }}>
+      {/* ═══════════════════ MAIN OBLIGATION ═══════════════════ */}
+      <div style={cardBase}>
+        {/* Header strip */}
+        <div style={{
+          padding: "11px 24px", display: "flex", alignItems: "center", gap: 10,
+          background: health.bg, borderBottom: `1px solid ${C.borderSubtle}`,
+        }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: health.color, flexShrink: 0 }} />
           <span style={{ fontSize: 13, fontWeight: 700, color: health.color }}>{health.label}</span>
-          <span style={{ fontSize: 12, color: "#8f96a3", marginLeft: "auto" }}>{paidCount} of 4 payments logged</span>
+          <span style={{ fontSize: 12, color: C.textMuted, marginLeft: "auto" }}>
+            {paidCount} of 4 quarters logged
+          </span>
         </div>
 
         {/* Hero */}
-        <div style={{ padding: `18px ${px}px 14px` }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 5 }}>Quarterly payment</div>
-          <div style={{ fontSize: 46, fontWeight: 800, letterSpacing: "-.04em", lineHeight: 1, color: "#e8eaed", fontVariantNumeric: "tabular-nums" }}>{$(result.quarterlyPayment)}</div>
-        </div>
+        <div style={{ padding: "28px 28px 18px" }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 10 }}>
+            {nextQuarterLabel ? `${nextQuarterLabel} quarterly payment` : "Quarterly payment"}
+          </div>
+          <div style={{
+            fontSize: 64, fontWeight: 900, letterSpacing: "-.04em", lineHeight: 1,
+            color: C.textMain, fontVariantNumeric: "tabular-nums", marginBottom: 14,
+          }}>
+            {$(result.quarterlyPayment)}
+          </div>
 
-        {/* Deadline */}
-        <div style={{ padding: `0 ${px}px 14px` }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: uc, boxShadow: days <= 14 ? `0 0 8px ${uc}` : "none" }} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#e8eaed" }}>Due {nd.due}</span>
-            <span style={{ fontSize: 13, color: days <= 14 ? "#f87171" : "#8b8f9a", fontWeight: days <= 14 ? 700 : 400 }}>
-              {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days} days`}
+          {/* Deadline row */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+            <div style={{ width: 9, height: 9, borderRadius: "50%", background: uc, boxShadow: days <= 14 ? `0 0 8px ${uc}` : "none", flexShrink: 0 }} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: C.textMain }}>Due {nd.due}</span>
+            <span style={{
+              fontSize: 13, fontWeight: 700,
+              color: days <= 14 ? C.red : C.textMuted,
+              background: days <= 14 ? C.redBg : "transparent",
+              padding: days <= 14 ? "2px 9px" : 0,
+              borderRadius: 5,
+            }}>
+              {days === 0 ? "Today" : days < 0 ? `${Math.abs(days)} days overdue` : days === 1 ? "Tomorrow" : `${days} days`}
             </span>
           </div>
         </div>
 
-        {/* Metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: "1px solid #222530" }}>
-          <div style={{ padding: `12px ${px}px`, borderRight: "1px solid #222530" }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Monthly target</div>
-            <div style={{ fontSize: 19, fontWeight: 800, color: "#e8eaed", fontVariantNumeric: "tabular-nums" }}>
-              {$(result.monthlySetAside)}<span style={{ fontSize: 12, fontWeight: 600, color: "#8b8f9a" }}>/mo</span>
+        {/* 2-col metrics */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: `1px solid ${C.borderSubtle}` }}>
+          <div style={{ padding: "16px 24px", borderRight: `1px solid ${C.borderSubtle}` }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>
+              Monthly set-aside
             </div>
-            <div style={{ fontSize: 11, color: "#34d399", fontWeight: 600, marginTop: 1 }}>Set aside monthly to stay on track</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: C.textMain, fontVariantNumeric: "tabular-nums", letterSpacing: "-.02em" }}>
+              {$(result.monthlySetAside)}<span style={{ fontSize: 13, fontWeight: 600, color: C.textMuted }}>/mo</span>
+            </div>
+            <div style={{ fontSize: 11, color: C.green, fontWeight: 600, marginTop: 3 }}>Reserve this monthly to stay on track</div>
           </div>
-          <div style={{ padding: `12px ${px}px` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 3 }}>Effective rate</div>
-            <div style={{ fontSize: 19, fontWeight: 800, color: "#e8eaed" }}>{P(result.effectiveRate)}</div>
-            {result.effectiveRate > 0 && result.effectiveRate < result.marginalRate * 0.8 && (
-              <div style={{ fontSize: 11, color: "#8b8f9a", fontWeight: 500, marginTop: 1 }}>Below your {P(result.marginalRate)} marginal bracket</div>
+          <div style={{ padding: "16px 24px" }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>
+              Effective rate
+            </div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: C.textMain, letterSpacing: "-.02em" }}>{P(result.effectiveRate)}</div>
+            {result.effectiveRate > 0 && (
+              <div style={{ fontSize: 11, color: C.textMuted, fontWeight: 500, marginTop: 3 }}>
+                Marginal bracket: {P(result.marginalRate)}
+              </div>
             )}
           </div>
         </div>
 
-        {/* Quarterly obligations */}
-        <div style={{ borderTop: "1px solid #222530", padding: `12px ${px}px` }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8 }}>Quarterly obligations</div>
-          {DEADLINES.map((q, i) => {
-            const st = statuses[i];
-            const cfg = STATUS_STYLE[st];
-            const isActive = st === "current" || st === "due_soon" || st === "due_today" || st === "overdue";
-            return (
-              <div key={i} style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "7px 0", borderBottom: i < 3 ? "1px solid #222530" : "none",
-              }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? "#0ea5c9" : "#8f96a3", width: 22 }}>{q.quarter}</span>
-                  <span style={{ fontSize: 12, color: "#8f96a3" }}>Due {q.due}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: cfg.color, background: cfg.bg, padding: "2px 8px", borderRadius: 4 }}>
-                    {cfg.icon} {cfg.label}
-                  </span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{
-                    fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums",
-                    color: st === "paid" || st === "missed" ? "#8f96a3" : isActive ? "#0e7490" : "#e8eaed",
-                    textDecoration: st === "paid" ? "line-through" : "none",
-                  }}>{$(result.quarterlyPayment)}</span>
-                  <button onClick={() => onTogglePaid(i)} style={{
-                    fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 6, cursor: "pointer",
-                    fontFamily: "inherit", transition: "all .12s",
-                    background: st === "paid" ? "#0a2e23" : "#202535",
-                    border: st === "paid" ? "1px solid #0a2e23" : "1px solid #2a2e3a",
-                    color: st === "paid" ? "#34d399" : "#9da2ad",
-                  }}>{st === "paid" ? "Paid ✓" : "Log payment"}</button>
-                </div>
+        {/* 3-col breakdown */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderTop: `1px solid ${C.borderSubtle}` }}>
+          {[
+            { label: "Federal", value: result.quarterlyFederal },
+            { label: "State", value: result.quarterlyState },
+            { label: "SE Tax", value: result.quarterlySE },
+          ].map((item, i) => (
+            <div key={i} style={{
+              padding: "14px 20px",
+              borderRight: i < 2 ? `1px solid ${C.borderSubtle}` : "none",
+              textAlign: "center",
+            }}>
+              <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>
+                {item.label}
               </div>
-            );
-          })}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 6, paddingTop: 8, borderTop: "1px solid #2a2e3a" }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: "#8f96a3" }}>Total {new Date().getFullYear()}</span>
-            <span style={{ fontSize: 17, fontWeight: 800, fontVariantNumeric: "tabular-nums", color: "#e8eaed" }}>{$(result.totalAnnualTax)}</span>
-          </div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: C.textMain, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+                {$(item.value)}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Withholding check */}
         {hasW2 && (
-          <div style={{ borderTop: "1px solid #222530", padding: `12px ${px}px` }}>
-            <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em", marginBottom: 8 }}>Withholding check</div>
-
+          <div style={{ padding: "16px 24px", borderTop: `1px solid ${C.borderSubtle}`, background: C.panel2 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 8 }}>
+              Withholding check
+            </div>
             {w2Withholding <= 0 && (
-              <div style={{ fontSize: 13, color: "#8f96a3", lineHeight: 1.6 }}>Enter your federal withholding to see your options.</div>
+              <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.6 }}>Enter your federal withholding to see your options.</div>
             )}
-
             {w2Withholding > 0 && paychecksRemaining === 0 && (
-              <div style={{ fontSize: 13, color: "#8b8f9a", lineHeight: 1.6 }}>No paychecks remain this year, so withholding changes won't affect this year's taxes.</div>
+              <div style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.6 }}>No paychecks remain this year, so withholding changes won't affect this year's taxes.</div>
             )}
-
             {withholding && w2Withholding > 0 && paychecksRemaining > 0 && (
-              <div>
+              <div style={{ fontSize: 13, color: C.textMain, lineHeight: 1.6 }}>
                 {withholding.offsetType === "no_shortfall" && (
-                  <div style={{ fontSize: 13, color: "#e8eaed", lineHeight: 1.6 }}>Your current withholding covers your projected tax liability. No quarterly payments or adjustments needed.</div>
+                  <>Your current withholding covers your projected tax liability. No quarterly payments or adjustments needed.</>
                 )}
                 {withholding.offsetType === "full_offset" && (
-                  <div style={{ fontSize: 13, color: "#e8eaed", lineHeight: 1.6 }}>
-                    You can cover this through withholding. Increase your per-paycheck withholding by approximately <strong>{$(withholding.perPaycheckIncrease)}</strong> and skip quarterly estimated payments.
-                    <div style={{ fontSize: 12, color: "#8b8f9a", marginTop: 5 }}>To adjust, submit an updated W-4 to your employer — not the IRS.</div>
-                  </div>
+                  <>You can cover this through withholding. Increase your per-paycheck withholding by approximately <strong style={{ color: C.teal }}>{$(withholding.perPaycheckIncrease)}</strong> and skip quarterly estimated payments.
+                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>To adjust, submit an updated W-4 to your employer — not the IRS.</div>
+                  </>
                 )}
                 {withholding.offsetType === "partial_offset" && (
-                  <div style={{ fontSize: 13, color: "#e8eaed", lineHeight: 1.6 }}>
-                    Increase withholding by about <strong>{$(withholding.perPaycheckIncrease)} per paycheck</strong> to reduce quarterly payments from <strong>{$(result.quarterlyPayment)}</strong> to <strong>{$(withholding.reducedQuarterlyPayment)}</strong>.
-                    {paychecksRemaining <= 3 ? (
-                      <div style={{ fontSize: 12, color: "#8b8f9a", marginTop: 5 }}>With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, withholding changes have limited impact this year.</div>
-                    ) : (
-                      <div style={{ fontSize: 12, color: "#8b8f9a", marginTop: 5 }}>To adjust, submit an updated W-4 to your employer — not the IRS.</div>
-                    )}
-                  </div>
+                  <>Increase withholding by about <strong style={{ color: C.teal }}>{$(withholding.perPaycheckIncrease)} per paycheck</strong> to reduce quarterly payments from <strong>{$(result.quarterlyPayment)}</strong> to <strong>{$(withholding.reducedQuarterlyPayment)}</strong>.
+                    {paychecksRemaining <= 3
+                      ? <div style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, impact is limited.</div>
+                      : <div style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>Submit an updated W-4 to your employer to adjust.</div>}
+                  </>
                 )}
                 {withholding.offsetType === "quarterly_needed" && (
-                  <div style={{ fontSize: 13, color: "#e8eaed", lineHeight: 1.6 }}>
-                    Your remaining paychecks can't absorb the full shortfall at a reasonable level. Continue making quarterly payments of <strong>{$(result.quarterlyPayment)}</strong>.
-                    {paychecksRemaining <= 3 && paychecksRemaining > 0 && (
-                      <div style={{ fontSize: 12, color: "#8b8f9a", marginTop: 5 }}>With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, withholding changes have limited impact this year.</div>
-                    )}
-                  </div>
+                  <>Your remaining paychecks can't absorb the full shortfall at a reasonable level. Continue making quarterly payments of <strong style={{ color: C.teal }}>{$(result.quarterlyPayment)}</strong>.</>
                 )}
-                <div style={{ fontSize: 11, color: "#8f96a3", marginTop: 6 }}>Estimate based on inputs provided. Actual withholding depends on your W-4 and employer payroll.</div>
               </div>
             )}
           </div>
         )}
 
-        {/* ═══ CTA AREA — 3 states ═══ */}
-
-        {/* State 1: Paid user — tracking active */}
-        {isPaid && (
-          <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#0a2e23" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8l3.5 3.5 6.5-6.5" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span style={{ fontSize: 14, fontWeight: 700, color: "#34d399" }}>Tracking active</span>
-            </div>
-            <div style={{ fontSize: 12, color: "#8b8f9a", marginTop: 3, paddingLeft: 24 }}>
-              Saved payment history is enabled for this account.
-            </div>
-          </div>
-        )}
-
-        {/* State 2: Signed in, not paid — upgrade CTA */}
-        {isAuthenticated && !isPaid && (
-          <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#122b35" }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#0ea5c9", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>Unlock tracking</div>
-            <button onClick={onTrack} style={{
-              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-              background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
-            }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e8eaed", textAlign: "left" }}>Save your payment history</div>
-                <div style={{ fontSize: 12, color: "#8b8f9a", textAlign: "left" }}>Saved quarters. Deadline reminders. Quarter-by-quarter tracking.</div>
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 800, color: "#0f1117", background: "#0ea5c9", padding: "9px 16px", borderRadius: 8, flexShrink: 0 }}>Start tracking — $4/mo</span>
-            </button>
-          </div>
-        )}
-
-        {/* State 3: Anonymous — sign up CTA */}
-        {!isAuthenticated && (
-          <div style={{ borderTop: "1px solid #2a2e3a", padding: `14px ${px}px`, background: "#122b35" }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: "#0ea5c9", textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>Next step</div>
-            <button onClick={onTrack} style={{
-              width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-              background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", padding: 0,
-            }}>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#e8eaed", textAlign: "left" }}>Keep your payment history</div>
-                <div style={{ fontSize: 12, color: "#8b8f9a", textAlign: "left" }}>Sign up to save quarters, get reminders, and track every payment.</div>
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 800, color: "#0f1117", background: "#0ea5c9", padding: "9px 16px", borderRadius: 8, flexShrink: 0 }}>Sign up — $4/mo</span>
-            </button>
-          </div>
-        )}
-
-        {/* Warning */}
+        {/* Action row */}
         <div style={{
-          borderTop: "1px solid #342e16", padding: `7px ${px}px`, background: "#2c2512",
-          display: "flex", alignItems: "center", gap: 8, borderRadius: "0 0 12px 12px",
+          padding: "18px 24px", borderTop: `1px solid ${C.borderSubtle}`,
+          display: "flex", gap: 12, alignItems: "center",
         }}>
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 1L1 13h12L7 1z" fill="#e0b84d" />
-            <text x="7" y="11" textAnchor="middle" fill="#2c2512" fontSize="8" fontWeight="800">!</text>
-          </svg>
-          <span style={{ fontSize: 12, fontWeight: 500, color: "#e0b84d" }}>Underpayment may result in IRS penalties and interest charges</span>
+          <button
+            onClick={() => { if (allPaid || nextUnpaidIdx < 0) return; onTogglePaid(nextUnpaidIdx); }}
+            disabled={allPaid}
+            style={{
+              flex: 1, padding: "14px 18px",
+              background: allPaid ? C.panel2 : C.teal,
+              color: allPaid ? C.textMuted : C.bg,
+              borderRadius: 10, fontWeight: 800, fontSize: 14, fontFamily: "inherit",
+              border: "none", cursor: allPaid ? "default" : "pointer",
+              letterSpacing: "-.01em",
+            }}
+          >
+            {allPaid ? "All quarters logged" : `Log ${nextQuarterLabel} payment`}
+          </button>
+          <a href="https://directpay.irs.gov" target="_blank" rel="noopener noreferrer" style={{
+            padding: "13px 20px", background: "transparent",
+            border: `1px solid ${C.border}`, borderRadius: 10,
+            fontWeight: 700, fontSize: 13, color: C.textMuted,
+            textDecoration: "none", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6,
+            whiteSpace: "nowrap",
+          }}>
+            Pay on IRS.gov <span style={{ fontSize: 11 }}>↗</span>
+          </a>
         </div>
       </div>
 
-      {/* Breakdown strip */}
-      <div style={{ marginTop: 6, border: "1px solid #2a2e3a", borderRadius: 8, background: "#181b23", overflow: "hidden" }}>
-        <div style={{ padding: `10px ${px - 4}px`, display: "grid", gridTemplateColumns: "1fr 1fr 1fr" }}>
-          {[
-            { label: "Federal", value: $(result.quarterlyFederal) },
-            { label: "State", value: $(result.quarterlyState) },
-            { label: "SE Tax", value: $(result.quarterlySE) },
-          ].map((item, i) => (
-            <div key={i} style={{ textAlign: "center", padding: "3px 0", borderRight: i < 2 ? "1px solid #222530" : "none" }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "#8f96a3", textTransform: "uppercase", letterSpacing: ".05em" }}>{item.label}</div>
-              <div style={{ fontSize: 14, fontWeight: 800, color: "#e8eaed", marginTop: 1, fontVariantNumeric: "tabular-nums" }}>{item.value}</div>
+      {/* ═══════════════════ YEAR TRACKER ═══════════════════ */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={cardBase}>
+          {/* Year header */}
+          <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${C.borderSubtle}` }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+              <div style={{ fontSize: 14, fontWeight: 800, color: C.textMain, letterSpacing: "-.01em" }}>
+                {new Date().getFullYear()} Tax Year
+              </div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: C.textMuted }}>
+                {paidCount}/4 logged
+              </div>
             </div>
-          ))}
+            <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>Year Tracker</div>
+            <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>Total projected</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: C.textMain, fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
+                  {$(result.totalAnnualTax)}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>Remaining</div>
+                <div style={{ fontSize: 17, fontWeight: 800, color: remaining > 0 ? C.textMain : C.green, fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
+                  {$(remaining)}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quarter rows */}
+          <div>
+            {DEADLINES.map((q, i) => {
+              const st = statuses[i];
+              const cfg = STATUS_STYLE[st];
+              const isActive = st === "current" || st === "due_soon" || st === "due_today" || st === "overdue";
+              const isPaid_ = st === "paid";
+              return (
+                <div key={i} style={{
+                  padding: "12px 20px",
+                  borderBottom: i < 3 ? `1px solid ${C.borderSubtle}` : "none",
+                  background: isActive ? "rgba(20, 184, 214, 0.04)" : "transparent",
+                }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: isActive ? C.teal : C.textMain, letterSpacing: "-.01em" }}>{q.quarter}</span>
+                      <span style={{ fontSize: 11, color: C.textMuted }}>{q.due}</span>
+                    </div>
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, color: cfg.color, background: cfg.bg,
+                      padding: "3px 8px", borderRadius: 5, letterSpacing: ".04em",
+                    }}>
+                      {cfg.icon} {cfg.label}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{
+                      fontSize: 15, fontWeight: 700, fontVariantNumeric: "tabular-nums",
+                      color: isPaid_ ? C.textDim : C.textMain,
+                      textDecoration: isPaid_ ? "line-through" : "none",
+                    }}>
+                      {$(result.quarterlyPayment)}
+                    </span>
+                    <button onClick={() => onTogglePaid(i)} style={{
+                      fontSize: 11, fontWeight: 700, padding: "5px 11px", borderRadius: 6, cursor: "pointer",
+                      fontFamily: "inherit", transition: "all .12s",
+                      background: isPaid_ ? C.greenBg : C.panel2,
+                      border: isPaid_ ? `1px solid ${C.greenBg}` : `1px solid ${C.border}`,
+                      color: isPaid_ ? C.green : C.textMuted,
+                    }}>
+                      {isPaid_ ? "Paid ✓" : "Log"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* CTA — 3 states */}
+          {isPaid && (
+            <div style={{ padding: "14px 20px", borderTop: `1px solid ${C.borderSubtle}`, background: C.greenBg }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8l3.5 3.5 6.5-6.5" stroke={C.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <span style={{ fontSize: 13, fontWeight: 700, color: C.green }}>Tracking active</span>
+              </div>
+              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 4, paddingLeft: 24 }}>
+                Saved payment history is enabled for this account.
+              </div>
+            </div>
+          )}
+          {isAuthenticated && !isPaid && (
+            <button onClick={onTrack} style={{
+              width: "100%", padding: "14px 20px", borderTop: `1px solid ${C.borderSubtle}`,
+              background: C.tealBg, border: "none", cursor: "pointer", fontFamily: "inherit",
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+            }}>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Unlock tracking</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.textMain }}>Save your payment history</div>
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 800, color: C.bg, background: C.teal, padding: "8px 12px", borderRadius: 7, whiteSpace: "nowrap" }}>$4/mo</span>
+            </button>
+          )}
+          {!isAuthenticated && (
+            <button onClick={onTrack} style={{
+              width: "100%", padding: "14px 20px", borderTop: `1px solid ${C.borderSubtle}`,
+              background: C.tealBg, border: "none", cursor: "pointer", fontFamily: "inherit",
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+            }}>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Next step</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.textMain }}>Keep your payment history</div>
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 800, color: C.bg, background: C.teal, padding: "8px 12px", borderRadius: 7, whiteSpace: "nowrap" }}>$4/mo</span>
+            </button>
+          )}
         </div>
-      </div>
 
-      {/* Action row */}
-      <div style={{ display: "flex", gap: 10, marginTop: 5 }}>
-        <button onClick={() => { if (allPaid) return; const n = statuses.findIndex(s => s !== "paid"); if (n >= 0) onTogglePaid(n); }} style={{
-          flex: 1, textAlign: "center", padding: "14px",
-          background: allPaid ? "#2a2e3a" : "#e8eaed", color: allPaid ? "#8f96a3" : "#0f1117",
-          borderRadius: 10, fontWeight: 700, fontSize: 14, fontFamily: "inherit",
-          border: "none", cursor: allPaid ? "default" : "pointer",
+        {/* Warning card */}
+        <div style={{
+          background: C.yellowBg, border: `1px solid ${C.yellowBg}`,
+          borderRadius: 12, padding: "10px 14px",
+          display: "flex", alignItems: "flex-start", gap: 10,
         }}>
-          {allPaid ? "All payments logged" : `Log ${DEADLINES[statuses.findIndex(s => s !== "paid")]?.quarter || "Q1"} payment`}
-        </button>
-        <a href="https://directpay.irs.gov" target="_blank" rel="noopener noreferrer" style={{
-          padding: "12px 18px", background: "transparent", border: "1px solid #2a2e3a", borderRadius: 10,
-          fontWeight: 600, fontSize: 13, color: "#9da2ad", textDecoration: "none", fontFamily: "inherit",
-          display: "flex", alignItems: "center",
-        }}>IRS.gov ↗</a>
-      </div>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, marginTop: 1 }}>
+            <path d="M8 1.5L1 14.5h14L8 1.5z" fill={C.yellow} />
+            <text x="8" y="13" textAnchor="middle" fill={C.bg} fontSize="9" fontWeight="800">!</text>
+          </svg>
+          <span style={{ fontSize: 12, fontWeight: 500, color: C.yellow, lineHeight: 1.4 }}>
+            Underpayment may result in IRS penalties and interest charges.
+          </span>
+        </div>
 
-      {/* Disclaimer */}
-      <div style={{ marginTop: 10, fontSize: 11, color: "#8f96a3", lineHeight: 1.6 }}>
-        <strong style={{ color: "#9da2ad" }}>Not tax advice.</strong> Simplified 2025 federal brackets and flat state rates. Does not account for AMT, Medicare surtax, state-specific deductions, credits, or local taxes.
+        {/* Disclaimer */}
+        <div style={{ fontSize: 11, color: C.textMuted, lineHeight: 1.55, padding: "0 4px" }}>
+          <strong style={{ color: C.textMain, fontWeight: 700 }}>Not tax advice.</strong> Simplified 2025 federal brackets and flat state rates. Does not account for AMT, Medicare surtax, state-specific deductions, credits, or local taxes.
+        </div>
       </div>
     </div>
   );
