@@ -89,15 +89,32 @@ export default function ResultsPanel({
   };
 
   return (
-    <div className="qt-results-grid" style={{
-      display: "grid", gridTemplateColumns: "minmax(0, 1fr) 360px", gap: 20, alignItems: "start",
-    }}>
+    <div className="qt-results-grid">
+      <style>{`
+        @media (max-width: 1279px) {
+          .qt-main-pad { padding: 22px 22px 14px !important; }
+          .qt-metrics > div, .qt-breakdown > div { padding: 13px 18px !important; }
+          .qt-main-action { padding: 14px 22px !important; gap: 10px !important; }
+        }
+        @media (max-width: 540px) {
+          .qt-main-pad { padding: 20px 18px 12px !important; }
+          .qt-metrics { grid-template-columns: 1fr !important; }
+          .qt-metrics > div { border-right: none !important; border-bottom: 1px solid ${C.borderSubtle}; }
+          .qt-metrics > div:last-child { border-bottom: none; }
+          .qt-breakdown > div { padding: 12px 14px !important; }
+          .qt-main-action { flex-wrap: wrap !important; padding: 14px 18px !important; }
+          .qt-main-action > a { width: 100%; justify-content: center; }
+          .qt-quarter-row { padding: 11px 16px !important; }
+          .qt-tracker-header { padding: 14px 16px 12px !important; }
+        }
+      `}</style>
+
       {/* ═══════════════════ MAIN OBLIGATION ═══════════════════ */}
       <div style={cardBase}>
-        {/* Header strip */}
+        {/* Health strip */}
         <div style={{
-          padding: "11px 24px", display: "flex", alignItems: "center", gap: 10,
-          background: health.bg, borderBottom: `1px solid ${C.borderSubtle}`,
+          padding: "10px 22px", display: "flex", alignItems: "center", gap: 10,
+          background: health.bg, borderBottom: `1px solid ${C.borderSubtle}`, flexWrap: "wrap",
         }}>
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: health.color, flexShrink: 0 }} />
           <span style={{ fontSize: 13, fontWeight: 700, color: health.color }}>{health.label}</span>
@@ -107,13 +124,13 @@ export default function ResultsPanel({
         </div>
 
         {/* Hero */}
-        <div style={{ padding: "28px 28px 18px" }}>
-          <div style={{ fontSize: 11, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 10 }}>
+        <div className="qt-main-pad" style={{ padding: "26px 26px 16px" }}>
+          <div style={{ fontSize: 11, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".12em", marginBottom: 8 }}>
             {nextQuarterLabel ? `${nextQuarterLabel} quarterly payment` : "Quarterly payment"}
           </div>
-          <div style={{
-            fontSize: 64, fontWeight: 900, letterSpacing: "-.04em", lineHeight: 1,
-            color: C.textMain, fontVariantNumeric: "tabular-nums", marginBottom: 14,
+          <div className="qt-hero-number" style={{
+            fontWeight: 900, letterSpacing: "-.04em", lineHeight: 1,
+            color: C.textMain, fontVariantNumeric: "tabular-nums", marginBottom: 12,
           }}>
             {$(result.quarterlyPayment)}
           </div>
@@ -121,9 +138,9 @@ export default function ResultsPanel({
           {/* Deadline row */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
             <div style={{ width: 9, height: 9, borderRadius: "50%", background: uc, boxShadow: days <= 14 ? `0 0 8px ${uc}` : "none", flexShrink: 0 }} />
-            <span style={{ fontSize: 15, fontWeight: 700, color: C.textMain }}>Due {nd.due}</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.textMain }}>Due {nd.due}</span>
             <span style={{
-              fontSize: 13, fontWeight: 700,
+              fontSize: 12, fontWeight: 700,
               color: days <= 14 ? C.red : C.textMuted,
               background: days <= 14 ? C.redBg : "transparent",
               padding: days <= 14 ? "2px 9px" : 0,
@@ -135,23 +152,23 @@ export default function ResultsPanel({
         </div>
 
         {/* 2-col metrics */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: `1px solid ${C.borderSubtle}` }}>
-          <div style={{ padding: "16px 24px", borderRight: `1px solid ${C.borderSubtle}` }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>
+        <div className="qt-metrics" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderTop: `1px solid ${C.borderSubtle}` }}>
+          <div style={{ padding: "15px 22px", borderRight: `1px solid ${C.borderSubtle}` }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 5 }}>
               Monthly set-aside
             </div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: C.textMain, fontVariantNumeric: "tabular-nums", letterSpacing: "-.02em" }}>
-              {$(result.monthlySetAside)}<span style={{ fontSize: 13, fontWeight: 600, color: C.textMuted }}>/mo</span>
+            <div style={{ fontSize: 22, fontWeight: 800, color: C.textMain, fontVariantNumeric: "tabular-nums", letterSpacing: "-.02em" }}>
+              {$(result.monthlySetAside)}<span style={{ fontSize: 12, fontWeight: 600, color: C.textMuted }}>/mo</span>
             </div>
-            <div style={{ fontSize: 11, color: C.green, fontWeight: 600, marginTop: 3 }}>Reserve this monthly to stay on track</div>
+            <div style={{ fontSize: 11, color: C.green, fontWeight: 600, marginTop: 2 }}>Reserve monthly to stay on track</div>
           </div>
-          <div style={{ padding: "16px 24px" }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 6 }}>
+          <div style={{ padding: "15px 22px" }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 5 }}>
               Effective rate
             </div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: C.textMain, letterSpacing: "-.02em" }}>{P(result.effectiveRate)}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: C.textMain, letterSpacing: "-.02em" }}>{P(result.effectiveRate)}</div>
             {result.effectiveRate > 0 && (
-              <div style={{ fontSize: 11, color: C.textMuted, fontWeight: 500, marginTop: 3 }}>
+              <div style={{ fontSize: 11, color: C.textMuted, fontWeight: 500, marginTop: 2 }}>
                 Marginal bracket: {P(result.marginalRate)}
               </div>
             )}
@@ -159,21 +176,21 @@ export default function ResultsPanel({
         </div>
 
         {/* 3-col breakdown */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderTop: `1px solid ${C.borderSubtle}` }}>
+        <div className="qt-breakdown" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", borderTop: `1px solid ${C.borderSubtle}` }}>
           {[
             { label: "Federal", value: result.quarterlyFederal },
             { label: "State", value: result.quarterlyState },
             { label: "SE Tax", value: result.quarterlySE },
           ].map((item, i) => (
             <div key={i} style={{
-              padding: "14px 20px",
+              padding: "13px 18px",
               borderRight: i < 2 ? `1px solid ${C.borderSubtle}` : "none",
               textAlign: "center",
             }}>
               <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>
                 {item.label}
               </div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: C.textMain, marginTop: 4, fontVariantNumeric: "tabular-nums" }}>
+              <div style={{ fontSize: 17, fontWeight: 800, color: C.textMain, marginTop: 3, fontVariantNumeric: "tabular-nums" }}>
                 {$(item.value)}
               </div>
             </div>
@@ -182,8 +199,8 @@ export default function ResultsPanel({
 
         {/* Withholding check */}
         {hasW2 && (
-          <div style={{ padding: "16px 24px", borderTop: `1px solid ${C.borderSubtle}`, background: C.panel2 }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 8 }}>
+          <div style={{ padding: "14px 22px", borderTop: `1px solid ${C.borderSubtle}`, background: C.panel2 }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 7 }}>
               Withholding check
             </div>
             {w2Withholding <= 0 && (
@@ -199,14 +216,14 @@ export default function ResultsPanel({
                 )}
                 {withholding.offsetType === "full_offset" && (
                   <>You can cover this through withholding. Increase your per-paycheck withholding by approximately <strong style={{ color: C.teal }}>{$(withholding.perPaycheckIncrease)}</strong> and skip quarterly estimated payments.
-                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>To adjust, submit an updated W-4 to your employer — not the IRS.</div>
+                    <div style={{ fontSize: 12, color: C.textMuted, marginTop: 5 }}>Submit an updated W-4 to your employer — not the IRS.</div>
                   </>
                 )}
                 {withholding.offsetType === "partial_offset" && (
                   <>Increase withholding by about <strong style={{ color: C.teal }}>{$(withholding.perPaycheckIncrease)} per paycheck</strong> to reduce quarterly payments from <strong>{$(result.quarterlyPayment)}</strong> to <strong>{$(withholding.reducedQuarterlyPayment)}</strong>.
                     {paychecksRemaining <= 3
-                      ? <div style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, impact is limited.</div>
-                      : <div style={{ fontSize: 12, color: C.textMuted, marginTop: 6 }}>Submit an updated W-4 to your employer to adjust.</div>}
+                      ? <div style={{ fontSize: 12, color: C.textMuted, marginTop: 5 }}>With {paychecksRemaining} paycheck{paychecksRemaining !== 1 ? "s" : ""} remaining, impact is limited.</div>
+                      : <div style={{ fontSize: 12, color: C.textMuted, marginTop: 5 }}>Submit an updated W-4 to your employer to adjust.</div>}
                   </>
                 )}
                 {withholding.offsetType === "quarterly_needed" && (
@@ -218,15 +235,15 @@ export default function ResultsPanel({
         )}
 
         {/* Action row */}
-        <div style={{
-          padding: "18px 24px", borderTop: `1px solid ${C.borderSubtle}`,
-          display: "flex", gap: 12, alignItems: "center",
+        <div className="qt-main-action" style={{
+          padding: "16px 22px", borderTop: `1px solid ${C.borderSubtle}`,
+          display: "flex", gap: 12, alignItems: "center", flexWrap: "wrap",
         }}>
           <button
             onClick={() => { if (allPaid || nextUnpaidIdx < 0) return; onTogglePaid(nextUnpaidIdx); }}
             disabled={allPaid}
             style={{
-              flex: 1, padding: "14px 18px",
+              flex: "1 1 200px", padding: "13px 16px",
               background: allPaid ? C.panel2 : C.teal,
               color: allPaid ? C.textMuted : C.bg,
               borderRadius: 10, fontWeight: 800, fontSize: 14, fontFamily: "inherit",
@@ -237,7 +254,7 @@ export default function ResultsPanel({
             {allPaid ? "All quarters logged" : `Log ${nextQuarterLabel} payment`}
           </button>
           <a href="https://directpay.irs.gov" target="_blank" rel="noopener noreferrer" style={{
-            padding: "13px 20px", background: "transparent",
+            padding: "12px 18px", background: "transparent",
             border: `1px solid ${C.border}`, borderRadius: 10,
             fontWeight: 700, fontSize: 13, color: C.textMuted,
             textDecoration: "none", fontFamily: "inherit", display: "flex", alignItems: "center", gap: 6,
@@ -252,7 +269,7 @@ export default function ResultsPanel({
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div style={cardBase}>
           {/* Year header */}
-          <div style={{ padding: "16px 20px 14px", borderBottom: `1px solid ${C.borderSubtle}` }}>
+          <div className="qt-tracker-header" style={{ padding: "15px 18px 13px", borderBottom: `1px solid ${C.borderSubtle}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <div style={{ fontSize: 14, fontWeight: 800, color: C.textMain, letterSpacing: "-.01em" }}>
                 {new Date().getFullYear()} Tax Year
@@ -262,16 +279,16 @@ export default function ResultsPanel({
               </div>
             </div>
             <div style={{ fontSize: 11, color: C.textDim, marginTop: 2 }}>Year Tracker</div>
-            <div style={{ marginTop: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            <div style={{ marginTop: 11, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
               <div>
-                <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>Total projected</div>
-                <div style={{ fontSize: 17, fontWeight: 800, color: C.textMain, fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>Projected</div>
+                <div style={{ fontSize: 16, fontWeight: 800, color: C.textMain, fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
                   {$(result.totalAnnualTax)}
                 </div>
               </div>
               <div>
                 <div style={{ fontSize: 10, fontWeight: 800, color: C.textDim, textTransform: "uppercase", letterSpacing: ".1em" }}>Remaining</div>
-                <div style={{ fontSize: 17, fontWeight: 800, color: remaining > 0 ? C.textMain : C.green, fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: remaining > 0 ? C.textMain : C.green, fontVariantNumeric: "tabular-nums", marginTop: 2 }}>
                   {$(remaining)}
                 </div>
               </div>
@@ -286,12 +303,12 @@ export default function ResultsPanel({
               const isActive = st === "current" || st === "due_soon" || st === "due_today" || st === "overdue";
               const isPaid_ = st === "paid";
               return (
-                <div key={i} style={{
-                  padding: "12px 20px",
+                <div key={i} className="qt-quarter-row" style={{
+                  padding: "11px 18px",
                   borderBottom: i < 3 ? `1px solid ${C.borderSubtle}` : "none",
                   background: isActive ? "rgba(20, 184, 214, 0.04)" : "transparent",
                 }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 3 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       <span style={{ fontSize: 13, fontWeight: 800, color: isActive ? C.teal : C.textMain, letterSpacing: "-.01em" }}>{q.quarter}</span>
                       <span style={{ fontSize: 11, color: C.textMuted }}>{q.due}</span>
@@ -299,6 +316,7 @@ export default function ResultsPanel({
                     <span style={{
                       fontSize: 10, fontWeight: 800, color: cfg.color, background: cfg.bg,
                       padding: "3px 8px", borderRadius: 5, letterSpacing: ".04em",
+                      whiteSpace: "nowrap",
                     }}>
                       {cfg.icon} {cfg.label}
                     </span>
@@ -328,42 +346,42 @@ export default function ResultsPanel({
 
           {/* CTA — 3 states */}
           {isPaid && (
-            <div style={{ padding: "14px 20px", borderTop: `1px solid ${C.borderSubtle}`, background: C.greenBg }}>
+            <div style={{ padding: "13px 18px", borderTop: `1px solid ${C.borderSubtle}`, background: C.greenBg }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8l3.5 3.5 6.5-6.5" stroke={C.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 <span style={{ fontSize: 13, fontWeight: 700, color: C.green }}>Tracking active</span>
               </div>
-              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 4, paddingLeft: 24 }}>
+              <div style={{ fontSize: 11, color: C.textMuted, marginTop: 3, paddingLeft: 23 }}>
                 Saved payment history is enabled for this account.
               </div>
             </div>
           )}
           {isAuthenticated && !isPaid && (
             <button onClick={onTrack} style={{
-              width: "100%", padding: "14px 20px", borderTop: `1px solid ${C.borderSubtle}`,
+              width: "100%", padding: "13px 18px", borderTop: `1px solid ${C.borderSubtle}`,
               background: C.tealBg, border: "none", cursor: "pointer", fontFamily: "inherit",
               display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
             }}>
               <div style={{ textAlign: "left" }}>
-                <div style={{ fontSize: 10, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Unlock tracking</div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 3 }}>Unlock tracking</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: C.textMain }}>Save your payment history</div>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 800, color: C.bg, background: C.teal, padding: "8px 12px", borderRadius: 7, whiteSpace: "nowrap" }}>$4/mo</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: C.bg, background: C.teal, padding: "7px 11px", borderRadius: 7, whiteSpace: "nowrap" }}>$4/mo</span>
             </button>
           )}
           {!isAuthenticated && (
             <button onClick={onTrack} style={{
-              width: "100%", padding: "14px 20px", borderTop: `1px solid ${C.borderSubtle}`,
+              width: "100%", padding: "13px 18px", borderTop: `1px solid ${C.borderSubtle}`,
               background: C.tealBg, border: "none", cursor: "pointer", fontFamily: "inherit",
               display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
             }}>
               <div style={{ textAlign: "left" }}>
-                <div style={{ fontSize: 10, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 4 }}>Next step</div>
+                <div style={{ fontSize: 10, fontWeight: 800, color: C.teal, textTransform: "uppercase", letterSpacing: ".1em", marginBottom: 3 }}>Next step</div>
                 <div style={{ fontSize: 13, fontWeight: 700, color: C.textMain }}>Keep your payment history</div>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 800, color: C.bg, background: C.teal, padding: "8px 12px", borderRadius: 7, whiteSpace: "nowrap" }}>$4/mo</span>
+              <span style={{ fontSize: 12, fontWeight: 800, color: C.bg, background: C.teal, padding: "7px 11px", borderRadius: 7, whiteSpace: "nowrap" }}>$4/mo</span>
             </button>
           )}
         </div>
